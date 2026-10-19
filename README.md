@@ -1,28 +1,8 @@
-# G4 · ASP.NET Core (temática por elegir)
+# G4 · ASP.NET Core Gestión de incidencias informáticas (Help Desk)
+
+Temática ya elegida: Help Desk.
 
 Repositorio del **Grupo 4** del curso de .NET: aplicación web con **C#, ASP.NET Core MVC, Razor y Entity Framework Core**, desarrollada en equipo con Git y GitHub.
-
-## Temática: a elegir por el equipo
-
-Elegid **una** de estas temáticas durante el fin de semana. Todas parten del mismo esqueleto (usuarios con roles `User` y `Admin`); el dominio lo construís vosotros.
-
-1. **Gestión de incidencias informáticas (Help Desk):** registro de tickets, asignación de técnicos, prioridades y seguimiento de incidencias.
-2. **Gestión de empleados y vacaciones:** administración de empleados, departamentos, solicitudes de vacaciones y aprobaciones.
-3. **Gestión de inventario y almacenes:** control de productos, proveedores, existencias y movimientos de stock.
-4. **Gestión de proyectos y tareas (tipo Trello):** creación de proyectos, asignación de tareas, responsables, prioridades y estados.
-5. **Gestión de talleres mecánicos:** administración de clientes, vehículos, reparaciones, mecánicos y órdenes de trabajo.
-6. **Gestión de academias y centros de formación:** administración de alumnos, profesores, cursos, matrículas y calificaciones.
-7. **Gestión de presupuestos y facturas:** creación de presupuestos, gestión de clientes, servicios, facturas y estados de pago.
-8. **Portal de empleo inclusivo:** publicación de ofertas laborales, inscripción de candidatos y seguimiento de candidaturas, con filtros de accesibilidad.
-9. **Gestión de voluntariado:** plataforma para publicar actividades solidarias, gestionar voluntarios, inscripciones y organizaciones colaboradoras.
-10. **Gestión de programas de inserción laboral:** seguimiento de participantes, itinerarios formativos, orientadores y actividades de empleabilidad.
-11. **Gestión de eventos y talleres inclusivos:** organización de talleres, inscripciones, asistentes, espacios y necesidades de accesibilidad.
-12. **Gestión de espacios de coworking:** administración de salas, puestos de trabajo, clientes, reservas y disponibilidad.
-13. **Gestión de recursos y solicitudes internas:** solicitudes de material o equipamiento por empleados, con aprobación y seguimiento.
-14. **Banco de tiempo y habilidades:** plataforma donde los usuarios ofrecen conocimientos o servicios y solicitan ayuda a otros participantes.
-15. **Gestión de donaciones de material:** registro de entidades donantes, artículos disponibles, solicitudes de organizaciones y entregas realizadas.
-
-Cuando el equipo lo haya decidido, sustituid esta sección por la descripción de la temática elegida y de sus funcionalidades principales (por ejemplo, con una Pull Request).
 
 ## Qué incluye el esqueleto
 
