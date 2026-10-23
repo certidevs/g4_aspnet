@@ -8,4 +8,6 @@ public class Category
     public string Nombre {get;set;} = string.Empty;
     public string Descripcion{get; set;} = string.Empty;
 
+    public ICollection<Ticket> Tickets {get; set;} = new List<Ticket>();
+    public ICollection<TechnicianCategory> Tecnicos {get; set;} = new List<TechnicianCategory>();
 }
