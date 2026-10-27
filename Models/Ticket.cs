@@ -5,12 +5,12 @@ namespace G4AspNet.Models;
 public class Ticket
 {
     public int Id {get; set;}
-    public string Titulo {get; set;} = string.Empty;
+    public string Title {get; set;} = string.Empty;
     public string Descripcion {get; set;} = string.Empty;
 
-    public DateTime FechaCreacion {get; set;} = DateTime.Now;
+    public DateTime CreatedAt {get; set;} = DateTime.Now;
 
-    public DateTime? FechaResolucion {get; set;}
+    public DateTime? ResolvedAt {get; set;}
 
     public EstadoTicket Estado {get; set;}
 
