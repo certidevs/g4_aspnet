@@ -10,4 +10,5 @@ public class Project
     public SupportLevel SupportLevel { get; set; }
     public int ResponseTimeHours { get; set; }
     public bool IsActive { get; set; }
+    public int? CompanyId { get; set; }
 }
