@@ -19,6 +19,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     // Represento en la BBDD las entidades 
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Project> Projects => Set<Project>();
 
     /// <summary>Configura las columnas añadidas a la tabla de usuarios de Identity.</summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
