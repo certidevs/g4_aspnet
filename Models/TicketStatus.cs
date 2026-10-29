@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace G4AspNet.Models;
 
-public enum EstadoTicket
+public enum TicketStatus
 {
     [Display (Name = "Abierto")]
     Open,
