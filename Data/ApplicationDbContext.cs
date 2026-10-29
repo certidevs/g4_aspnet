@@ -19,7 +19,6 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     // Represento en la BBDD las entidades 
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<Category> Categories => Set<Category>();
-    public DbSet<TechnicianCategory> TechnicianCategories => Set<TechnicianCategory>();
 
     /// <summary>Configura las columnas añadidas a la tabla de usuarios de Identity.</summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -34,33 +33,35 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.Property(c => c.Nombre).HasMaxLength(100);
-            entity.Property(c => c.Descripcion).HasMaxLength(500);
-            entity.HasIndex(c => c.Nombre).IsUnique();
+            entity.Property(c => c.Name).HasMaxLength(100);
+            entity.Property(c => c.Description).HasMaxLength(500);
+            entity.HasIndex(c => c.Name).IsUnique();
         });
-
-        // configurar TechnicianCategory
-        // moderlBurilder.Empty
 
         modelBuilder.Entity<Ticket>(entity =>
         {
-            entity.Property(t => t.Titulo).HasMaxLength(100);
-            entity.Property(t => t.Descripcion).HasMaxLength(500);
+            entity.Property(t => t.Title).HasMaxLength(100);
+            entity.Property(t => t.Description).HasMaxLength(500);
+
+            // Relación con ApplicationUser (creador)
+            entity.HasOne(t => t.CreatedBy)
+                  .WithMany()
+                  .HasForeignKey(t => t.CreatedById);
+
+            // Relación con ApplicationUser (técnico responsable, opcional)
+            entity.HasOne(t => t.AssignedTo)
+                  .WithMany()
+                  .HasForeignKey(t => t.AssignedToId);
 
             // Relación con Category
-            entity.HasOne(t => t.Usuario)
+            entity.HasOne(t => t.Category)
                   .WithMany()
-                  .HasForeignKey(t => t.UsuarioId);
-                              
-            // Relación con ApplicationUser (creador)
-            entity.HasOne(t => t.Responsable)
+                  .HasForeignKey(t => t.CategoryId);
+
+            // Relación con Project
+            entity.HasOne(t => t.Project)
                   .WithMany()
-                  .HasForeignKey(t => t.ResponsableId);
-                  
-            entity.HasOne(t => t.Categoria)
-                  .WithMany(c => c.Tickets)
-                  .HasForeignKey(t => t.CategoriaId);
-                  
+                  .HasForeignKey(t => t.ProjectId);
         });
     }
 }
