@@ -19,6 +19,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     // Represento en la BBDD las entidades 
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Project> Projects => Set<Project>();
 
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
 
