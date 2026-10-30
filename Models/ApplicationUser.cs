@@ -15,5 +15,5 @@ public sealed class ApplicationUser : IdentityUser
     /// <summary>Permite desactivar una cuenta sin borrar la información futura que posea.</summary>
     public bool IsActive { get; set; } = true;
     public Company? Company {get; set;}
-    public int CompanyId {get; set;}
+    public int? CompanyId {get; set;}
 }

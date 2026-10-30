@@ -9,7 +9,7 @@ public class Ticket
     public string Description { get; set; } = string.Empty;
     public TicketStatus Status { get; set; }
     public TicketPriority Priority { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ResolvedAt { get; set; }
 
     //Foraneas
