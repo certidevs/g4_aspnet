@@ -26,4 +26,7 @@ public class Ticket
 
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
+
+    public ICollection<TicketComment> Comments { get; set; }
+    = new List<TicketComment>();
 }

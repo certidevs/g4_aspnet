@@ -20,6 +20,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<Category> Categories => Set<Category>();
 
+    public DbSet<TicketComment> TicketComments => Set<TicketComment>();
+
     /// <summary>Configura las columnas añadidas a la tabla de usuarios de Identity.</summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,6 +64,26 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(t => t.Project)
                   .WithMany()
                   .HasForeignKey(t => t.ProjectId);
+        });
+
+        /* Este "modelBuilder" establece que los comentarios pertenezcan a un ticket y a un autor,
+        Si se elimina, sus comentarios se quitan también. */
+
+        modelBuilder.Entity<TicketComment>(entity =>
+        {
+            entity.Property(c => c.Message)
+                .HasMaxLength(2000)
+                .IsRequired();
+
+            entity.HasOne(c => c.Ticket)
+                .WithMany(t => t.Comments)
+                .HasForeignKey(c => c.TicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(c => c.Author)
+                .WithMany()
+                .HasForeignKey(c => c.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

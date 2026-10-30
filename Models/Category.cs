@@ -8,5 +8,10 @@ public class Category
     public string Name {get;set;} = string.Empty;
     public string Description{get; set;} = string.Empty;
 
+    public Ticket? Ticket {get; set;}
 
+    public int TicketId {get; set;}
+
+    public ICollection<Ticket> Tickets { get; set; }
+    = new List<Ticket>();
 }
