@@ -84,7 +84,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
             // Relación con Project
             entity.HasOne(t => t.Project)
-                  .WithMany()
+                  .WithMany(p => p.Tickets)
                   .HasForeignKey(t => t.ProjectId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
