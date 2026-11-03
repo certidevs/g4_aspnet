@@ -19,6 +19,24 @@ public static class DbInitializer
             return;
         }
 
+        if (!context.Categories.Any())
+        {
+            context.Categories.AddRange(
+                new Category { Name = "Hardware", Description = "Problemas en el equipo físico." },
+                new Category { Name = "Software", Description = "Problemas con aplicaciones." },
+                new Category { Name = "Redes", Description = "Problemas de conexión." },
+                new Category { Name = "Cuentas", Description = "Problemas de usuario." },
+                new Category { Name = "Otros", Description = "Problemas sin categoría." }
+
+
+            );
+
+            context.SaveChanges();
+        }
+
+
+
+
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await EnsureRoleAsync(roleManager, RoleNames.User);
         await EnsureRoleAsync(roleManager, RoleNames.Admin);
