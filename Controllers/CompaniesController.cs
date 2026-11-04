@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using G4AspNet.Data;
 using G4AspNet.Models;
@@ -11,22 +11,23 @@ namespace G4AspNet.Controllers
         // GET: CompanyController
         public CompaniesController(ApplicationDbContext context)
         {
-            this.context=context;
+            this.context = context;
         }
         public IActionResult Index()
         {
-            var categories = context.Companies.ToList();
+            var companies = context.Companies.ToList();
             
-            return View(categories);
+            return View(companies);
         }
         public IActionResult Details(int id)
         {
-            var category = context.Categories.Find(id);
-            if (category==null)
+            var company = context.Companies.FirstOrDefault(c => c.Id == id);
+            if (company == null)
             {
                 return NotFound();
             }
-            return View(category);
+
+            return View(company);
         }
 
 
