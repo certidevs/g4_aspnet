@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using G4AspNet.Models;
 
@@ -24,8 +24,8 @@ public static class DbInitializer
         if (!await context.Companies.AnyAsync())
         {
             context.Companies.AddRange(
-                new Company { Name = "TechCorp Solutions" },
-                new Company { Name = "Innovación Digital S.L." }
+                new Company { Name = "TechCorp Solutions", TaxId = "A12345678" },
+                new Company { Name = "Innovación Digital S.L.", TaxId = "B98765432" }
             );
             await context.SaveChangesAsync();
         }
@@ -94,8 +94,7 @@ public static class DbInitializer
                     ProjectId = project.Id,
                     CategoryId = category.Id,
                     CreatedById = demoUser?.Id ?? "Id1",
-                    AssignedToId = adminUser?.Id,
-                    ResolvedAt = DateTime.UtcNow.AddDays(-1)
+                    AssignedToId = adminUser?.Id
                 },
                 new Ticket
                 {
@@ -106,32 +105,33 @@ public static class DbInitializer
                     ProjectId = project.Id,
                     CategoryId = category.Id,
                     CreatedById = demoUser?.Id ?? "Id2",
-                    AssignedToId = adminUser?.Id,
-                    ResolvedAt = DateTime.UtcNow.AddDays(-1)
+                    AssignedToId = adminUser?.Id
                 },
                 new Ticket
                 {
                     Title = "Actualizar certificado",
                     Description = "El certificado expira la próxima semana en el servidor principal.",
                     Priority = TicketPriority.High,
-                    Status = TicketStatus.InProgress,
+                    Status = TicketStatus.Resolved,
+                    CreatedAt = new DateTime(2026, 10, 30, 9, 0, 0, DateTimeKind.Utc),
                     ProjectId = project.Id,
                     CategoryId = category.Id,
                     CreatedById = demoUser?.Id ?? "Id3",
                     AssignedToId = adminUser?.Id,
-                    ResolvedAt = DateTime.UtcNow.AddDays(-1)
+                    ResolvedAt = new DateTime(2026, 11, 2, 17, 0, 0, DateTimeKind.Utc)
                 },
                 new Ticket
                 {
                     Title = "Fallo de diseño responsive en móvil",
                     Description = "El menú hamburguesa se solapa con el logotipo principal.",
                     Priority = TicketPriority.High,
-                    Status = TicketStatus.InProgress,
+                    Status = TicketStatus.Closed,
+                    CreatedAt = new DateTime(2026, 10, 28, 9, 0, 0, DateTimeKind.Utc),
                     ProjectId = project.Id,
                     CategoryId = category.Id,
                     CreatedById = demoUser?.Id ?? "Id4",
                     AssignedToId = adminUser?.Id,
-                    ResolvedAt = DateTime.UtcNow.AddDays(-1)
+                    ResolvedAt = new DateTime(2026, 11, 1, 16, 0, 0, DateTimeKind.Utc)
                 },
                 new Ticket
                 {
@@ -142,8 +142,7 @@ public static class DbInitializer
                     ProjectId = project.Id,
                     CategoryId = category.Id,
                     CreatedById = demoUser?.Id ?? "Id5",
-                    AssignedToId = adminUser?.Id,
-                    ResolvedAt = DateTime.UtcNow.AddDays(-1)
+                    AssignedToId = adminUser?.Id
                 }
             };
 
