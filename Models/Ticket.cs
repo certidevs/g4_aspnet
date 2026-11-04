@@ -1,14 +1,20 @@
-using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace G4AspNet.Models;
 
 public class Ticket
 {
     public int Id { get; set; }
+
+    [Required]
+    [StringLength(100)]
     public string Title { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(2000)]
     public string Description { get; set; } = string.Empty;
-    public TicketStatus Status { get; set; }
-    public TicketPriority Priority { get; set; }
+    public TicketStatus Status { get; set; } = TicketStatus.Open;
+    public TicketPriority Priority { get; set; } = TicketPriority.Medium;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ResolvedAt { get; set; }
 
