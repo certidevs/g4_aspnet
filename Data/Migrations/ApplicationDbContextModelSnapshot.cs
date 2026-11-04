@@ -108,7 +108,7 @@ namespace G4AspNet.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
+                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -168,6 +168,7 @@ namespace G4AspNet.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -175,6 +176,7 @@ namespace G4AspNet.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("ResponseTimeHours")
@@ -211,7 +213,7 @@ namespace G4AspNet.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
+                        .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Priority")
@@ -430,7 +432,8 @@ namespace G4AspNet.Data.Migrations
                 {
                     b.HasOne("G4AspNet.Models.ApplicationUser", "AssignedTo")
                         .WithMany()
-                        .HasForeignKey("AssignedToId");
+                        .HasForeignKey("AssignedToId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("G4AspNet.Models.Category", "Category")
                         .WithMany("Tickets")
@@ -445,7 +448,7 @@ namespace G4AspNet.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("G4AspNet.Models.Project", "Project")
-                        .WithMany()
+                        .WithMany("Tickets")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -530,6 +533,11 @@ namespace G4AspNet.Data.Migrations
                 });
 
             modelBuilder.Entity("G4AspNet.Models.Category", b =>
+                {
+                    b.Navigation("Tickets");
+                });
+
+            modelBuilder.Entity("G4AspNet.Models.Project", b =>
                 {
                     b.Navigation("Tickets");
                 });
