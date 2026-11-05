@@ -1,11 +1,14 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace G4AspNet.Models;
 
 public class Ticket
 {
     public int Id { get; set; }
+    [StringLength(100)]
     public string Title { get; set; } = string.Empty;
+    [StringLength(2000)]
     public string Description { get; set; } = string.Empty;
     public TicketStatus Status { get; set; }
     public TicketPriority Priority { get; set; }
@@ -26,7 +29,5 @@ public class Ticket
 
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
-
-    public ICollection<TicketComment> Comments { get; set; }
-    = new List<TicketComment>();
+    public List<TicketComment> Comments { get; set; } = new();
 }
