@@ -1,0 +1,5 @@
+[33mbed98b2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge branch 'main' of https://github.com/certidevs/g4_aspnet
+[33m26e94b5[m Add TicketComment entity and relationships
+[33maf27112[m Eliminar TicketReview
+[33m98d2988[m incorporar clave foranea en Category
+[33med43bb7[m ApplicationUser.cs clave foranea CompanyId
