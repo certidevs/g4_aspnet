@@ -56,14 +56,14 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Category>(entity =>
         {
             entity.Property(c => c.Name).HasMaxLength(100);
-            entity.Property(c => c.Description).HasMaxLength(500);
+            entity.Property(c => c.Description).HasMaxLength(2000);
             entity.HasIndex(c => c.Name).IsUnique();
         });
 
         modelBuilder.Entity<Ticket>(entity =>
         {
             entity.Property(t => t.Title).HasMaxLength(100);
-            entity.Property(t => t.Description).HasMaxLength(500);
+            entity.Property(t => t.Description).HasMaxLength(2000);
 
             // Relación con ApplicationUser (creador)
             entity.HasOne(t => t.CreatedBy)
@@ -74,7 +74,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             // Relación con ApplicationUser (técnico responsable, opcional)
             entity.HasOne(t => t.AssignedTo)
                   .WithMany()
-                  .HasForeignKey(t => t.AssignedToId);
+                  .HasForeignKey(t => t.AssignedToId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // Relación con Category
             entity.HasOne(t => t.Category)

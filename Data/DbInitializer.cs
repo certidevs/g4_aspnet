@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using G4AspNet.Models;
 
@@ -10,7 +10,8 @@ public static class DbInitializer
     public static async Task InitializeAsync(IServiceProvider services)
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        // Facilita arrancar en clase sin ejecutar comandos SQL manuales.
+        
+        // Aplica migraciones pendientes de forma automática
         context.Database.Migrate();
 
         var configuration = services.GetRequiredService<IConfiguration>();
@@ -19,24 +20,39 @@ public static class DbInitializer
             return;
         }
 
-        if (!context.Categories.Any())
+        // 1. Crear Empresas (Compañías) primero, ya que los proyectos dependen de ellas
+        if (!await context.Companies.AnyAsync())
         {
-            context.Categories.AddRange(
-                new Category { Name = "Hardware", Description = "Problemas en el equipo físico." },
-                new Category { Name = "Software", Description = "Problemas con aplicaciones." },
-                new Category { Name = "Redes", Description = "Problemas de conexión." },
-                new Category { Name = "Cuentas", Description = "Problemas de usuario." },
-                new Category { Name = "Otros", Description = "Problemas sin categoría." }
-
-
+            context.Companies.AddRange(
+                new Company { Name = "TechCorp Solutions", TaxId = "A12345678" },
+                new Company { Name = "Innovación Digital S.L.", TaxId = "B98765432" }
             );
-
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
+        // 2. Crear Proyectos demo (asegurando que tengan un CompanyId válido existente, por ejemplo, 1 o 2)
+        if (!await context.Projects.AnyAsync())
+        {
+            context.Projects.AddRange(
+                new Project { Name = "Youtube", Description = "Creacion de videos", ResponseTimeHours = 4, CompanyId = 1 },
+                new Project { Name = "Gmail", Description = "Creacion de la plataforma de correo", ResponseTimeHours = 2, CompanyId = 2 },
+                new Project { Name = "YoutubeMusic", Description = "Creacion de videos musicales", ResponseTimeHours = 3, CompanyId = 1 }
+            );
+            await context.SaveChangesAsync();
+        }
 
+        // 3. Crear Categorías demo
+        if (!await context.Categories.AnyAsync())
+        {
+            context.Categories.AddRange(
+                new Category { Name = "Hardware", Description = "Solucion para el hardware" },
+                new Category { Name = "Software", Description = "Solucion para el software" },
+                new Category { Name = "Otros", Description = "Soluciona el resto" }
+            );
+            await context.SaveChangesAsync();
+        }
 
-
+        // 4. Crear Roles y Usuarios de Identity primero para asegurar que existan los IDs
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await EnsureRoleAsync(roleManager, RoleNames.User);
         await EnsureRoleAsync(roleManager, RoleNames.Admin);
@@ -49,6 +65,7 @@ public static class DbInitializer
             displayName: "Administrador",
             password: "Admin123!",
             role: RoleNames.Admin);
+            
         await EnsureUserAsync(
             userManager,
             username: "user",
@@ -56,6 +73,82 @@ public static class DbInitializer
             displayName: "Usuario de demo",
             password: "User123!",
             role: RoleNames.User);
+
+        // 5. Crear Tickets demo (solo si no existen y asegurando que las FK apunten a registros reales)
+        if (!await context.Tickets.AnyAsync())
+        {
+            // Obtenemos IDs reales de la base de datos para evitar errores de claves foráneas
+            var project = await context.Projects.FirstAsync();
+            var category = await context.Categories.FirstAsync();
+            var adminUser = await userManager.FindByNameAsync("admin");
+            var demoUser = await userManager.FindByNameAsync("user");
+
+            var tickets = new[]
+            {
+                new Ticket
+                {
+                    Title = "Error al iniciar sesión",
+                    Description = "Los usuarios reportan fallo 500 en el login.",
+                    Priority = TicketPriority.Medium,
+                    Status = TicketStatus.Open,
+                    ProjectId = project.Id,
+                    CategoryId = category.Id,
+                    CreatedById = demoUser?.Id ?? "Id1",
+                    AssignedToId = adminUser?.Id
+                },
+                new Ticket
+                {
+                    Title = "Lentitud en pasarela de pago",
+                    Description = "Las peticiones de cobro tardan más de 10 segundos.",
+                    Priority = TicketPriority.High,
+                    Status = TicketStatus.InProgress,
+                    ProjectId = project.Id,
+                    CategoryId = category.Id,
+                    CreatedById = demoUser?.Id ?? "Id2",
+                    AssignedToId = adminUser?.Id
+                },
+                new Ticket
+                {
+                    Title = "Actualizar certificado",
+                    Description = "El certificado expira la próxima semana en el servidor principal.",
+                    Priority = TicketPriority.High,
+                    Status = TicketStatus.Resolved,
+                    CreatedAt = new DateTime(2026, 10, 30, 9, 0, 0, DateTimeKind.Utc),
+                    ProjectId = project.Id,
+                    CategoryId = category.Id,
+                    CreatedById = demoUser?.Id ?? "Id3",
+                    AssignedToId = adminUser?.Id,
+                    ResolvedAt = new DateTime(2026, 11, 2, 17, 0, 0, DateTimeKind.Utc)
+                },
+                new Ticket
+                {
+                    Title = "Fallo de diseño responsive en móvil",
+                    Description = "El menú hamburguesa se solapa con el logotipo principal.",
+                    Priority = TicketPriority.High,
+                    Status = TicketStatus.Closed,
+                    CreatedAt = new DateTime(2026, 10, 28, 9, 0, 0, DateTimeKind.Utc),
+                    ProjectId = project.Id,
+                    CategoryId = category.Id,
+                    CreatedById = demoUser?.Id ?? "Id4",
+                    AssignedToId = adminUser?.Id,
+                    ResolvedAt = new DateTime(2026, 11, 1, 16, 0, 0, DateTimeKind.Utc)
+                },
+                new Ticket
+                {
+                    Title = "Añadir campo NIF en formulario",
+                    Description = "Requerido por normativa fiscal vigente en el registro de usuarios.",
+                    Priority = TicketPriority.Low,
+                    Status = TicketStatus.Open,
+                    ProjectId = project.Id,
+                    CategoryId = category.Id,
+                    CreatedById = demoUser?.Id ?? "Id5",
+                    AssignedToId = adminUser?.Id
+                }
+            };
+
+            context.Tickets.AddRange(tickets);
+            await context.SaveChangesAsync();
+        }
     }
 
     private static async Task EnsureRoleAsync(RoleManager<IdentityRole> roleManager, string roleName)

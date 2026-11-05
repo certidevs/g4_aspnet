@@ -1,0 +1,101 @@
+@model G4AspNet.Models.Category
+
+@{
+    ViewData["Title"] = "Detalles del Cliente y sus Pedidos";
+}
+
+<div class="container mt-4">
+    
+    <!-- Cabecera con título y botones de navegación general -->
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h2>@ViewData["Title"]</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <!-- Botón para volver al listado principal -->
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a la Lista
+            </a>
+            <!-- Botón para editar la entidad principal -->
+            <a asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-warning text-white">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+        </div>
+    </div>
+
+    <!-- TARJETA 1: DATOS PRINCIPALES DE LA ENTIDAD -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="bi bi-person-badge"></i> Información del Cliente</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <!-- Propiedad escalar simple -->
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Id)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Id)</dd>
+
+                <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
+                <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+               
+
+                <!-- Ejemplo de relación 1 a 1 (si el Cliente tuviera una relación con otra entidad llamada "Direccion") -->
+           
+            </dl>
+        </div>
+    </div>
+
+    <!-- TARJETA 2: DATOS DE LA RELACIÓN (Colección / 1 a Muchos, ej. Pedidos del Cliente) -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="bi bi-cart-check"></i> Pedidos Asociados a este Cliente</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th class="text-center">Acciones del Pedido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Verificamos si la entidad principal tiene elementos en su relación (Colección) -->
+                        @if (Model.Tickets != null && Model.Tickets.Any())
+                        {
+                            foreach (var pedido in Model.Tickets)
+                            {
+                                <tr>
+                                    <td>@pedido.Id</td>
+                                    <td>@pedido.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>$@pedido.CreatedAt.ToString("N2")</td>
+                                    <td class="text-center">
+                                        <!-- Enlace para ver los detalles específicos de cada elemento relacionado -->
+                                        <a asp-controller="Pedidos" asp-action="Detalles" asp-route-id="@pedido.Id" class="btn btn-info btn-sm text-white" title="Ver Pedido">
+                                            <i class="bi bi-eye"></i> Ver Detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Mensaje si la relación está vacía -->
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">
+                                    Este cliente no registra ningún pedido asociado actualmente.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+}
