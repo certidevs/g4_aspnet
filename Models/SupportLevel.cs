@@ -11,6 +11,6 @@ public enum SupportLevel
     [Display(Name = "Estándar")]
     Standard,
 
-    [Display(Name = "Premiun")]
+    [Display(Name = "Premium")]
     Premium
 }

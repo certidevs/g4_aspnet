@@ -20,6 +20,7 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Project> Projects => Set<Project>();
+    public DbSet<Company> Companies => Set<Company>();
 
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
 
@@ -32,39 +33,61 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(user => user.DisplayName).HasMaxLength(100);
             entity.Property(user => user.AvatarFileName).HasMaxLength(260);
             entity.Property(user => user.CreatedAt).IsRequired();
+
+            entity.HasOne(user => user.Company)
+                  .WithMany()
+                  .HasForeignKey(user => user.CompanyId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Company>(entity =>
+        {
+            entity.HasIndex(c => c.TaxId).IsUnique();
+        });
+
+        modelBuilder.Entity<Project>(entity =>
+        {
+            entity.HasOne(p => p.Company)
+                  .WithMany()
+                  .HasForeignKey(p => p.CompanyId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Category>(entity =>
         {
             entity.Property(c => c.Name).HasMaxLength(100);
-            entity.Property(c => c.Description).HasMaxLength(500);
+            entity.Property(c => c.Description).HasMaxLength(2000);
             entity.HasIndex(c => c.Name).IsUnique();
         });
 
         modelBuilder.Entity<Ticket>(entity =>
         {
             entity.Property(t => t.Title).HasMaxLength(100);
-            entity.Property(t => t.Description).HasMaxLength(500);
+            entity.Property(t => t.Description).HasMaxLength(2000);
 
             // Relación con ApplicationUser (creador)
             entity.HasOne(t => t.CreatedBy)
                   .WithMany()
-                  .HasForeignKey(t => t.CreatedById);
+                  .HasForeignKey(t => t.CreatedById)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // Relación con ApplicationUser (técnico responsable, opcional)
             entity.HasOne(t => t.AssignedTo)
                   .WithMany()
-                  .HasForeignKey(t => t.AssignedToId);
+                  .HasForeignKey(t => t.AssignedToId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // Relación con Category
             entity.HasOne(t => t.Category)
-                  .WithMany()
-                  .HasForeignKey(t => t.CategoryId);
+                  .WithMany(c => c.Tickets)
+                  .HasForeignKey(t => t.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
             // Relación con Project
             entity.HasOne(t => t.Project)
-                  .WithMany()
-                  .HasForeignKey(t => t.ProjectId);
+                  .WithMany(p => p.Tickets)
+                  .HasForeignKey(t => t.ProjectId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         /* Este "modelBuilder" establece que los comentarios pertenezcan a un ticket y a un autor,
