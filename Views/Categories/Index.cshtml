@@ -1,0 +1,42 @@
+@model IEnumerable<Category>
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Categorías</h1>
+        <p class="text-secondary mb-0">Tipos de ticket con el número de tickets de cada una.</p>
+    </div>
+    @* DESCOMENTA: <a class="btn btn-primary" asp-action="Create">Nueva categoría</a> *@
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Todavía no hay categorías.</div>
+}
+else
+{
+    <div class="table-responsive border rounded">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>Categoría</th><th>Descripción</th><th>Tickets</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@category.Name</td>
+                        <td>@category.Description</td>
+                        <td>@category.Tickets.Count</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@category.Id">Ver</a>
+                            @* DESCOMENTA: <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@category.Id">Editar</a> *@
+                            @* DESCOMENTA: <form asp-action="Delete" asp-route-id="@category.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta categoría?')"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form> *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

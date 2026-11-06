@@ -1,0 +1,48 @@
+@model IEnumerable<Company>
+@{
+    ViewData["Title"] = "Empresas";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Empresas</h1>
+        <p class="text-secondary mb-0">Empresas clientes que reciben soporte.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">Nueva empresa</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Todavía no hay empresas.</div>
+}
+else
+{
+    <div class="table-responsive border rounded">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>Empresa</th><th>CIF</th><th>Email</th><th>Teléfono</th><th>Proyectos</th><th>Estado</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var company in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@company.Name</td>
+                        <td>@company.TaxId</td>
+                        <td>@company.Email</td>
+                        <td>@company.Phone</td>
+                        <td>@company.Projects.Count</td>
+                        <td><span class="badge @(company.IsActive ? "text-bg-success" : "text-bg-secondary")">@(company.IsActive ? "Activa" : "Inactiva")</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@company.Id">Ver</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@company.Id">Editar</a>
+                            @* Borrar es un POST (un form con botón), nunca un enlace. onsubmit pide confirmación antes de enviarlo *@
+                            <form asp-action="Delete" asp-route-id="@company.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta empresa?')">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

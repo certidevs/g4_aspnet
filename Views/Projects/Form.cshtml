@@ -1,0 +1,63 @@
+@model Project
+@{
+    ViewData["Title"] = "Formulario de proyecto";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">Formulario de proyecto</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
+</div>
+
+<div class="alert alert-warning">TODO (issue #13): descomenta el formulario y ajústalo</div>
+
+@* Modelo a copiar: Views/Companies/Form.cshtml (ejemplo completo). Al terminar, borra el aviso amarillo de arriba. *@
+@* DESCOMENTA DESDE AQUÍ
+<form asp-action="Save" method="post" class="card">
+    <div class="card-body p-4">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label asp-for="Name" class="form-label">Nombre</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="CompanyId" class="form-label">Empresa</label>
+                <select asp-for="CompanyId" asp-items="(SelectList)ViewBag.Companies" class="form-select"></select>
+                <span asp-validation-for="CompanyId" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label">Descripción</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="SupportLevel" class="form-label">Nivel de soporte</label>
+                <select asp-for="SupportLevel" asp-items="Html.GetEnumSelectList<SupportLevel>()" class="form-select"></select>
+                <span asp-validation-for="SupportLevel" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ResponseTimeHours" class="form-label">Tiempo de respuesta (horas)</label>
+                <input asp-for="ResponseTimeHours" class="form-control" />
+                <span asp-validation-for="ResponseTimeHours" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">Activo</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent text-end">
+        <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Crear proyecto" : "Guardar cambios")</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+FIN DESCOMENTA *@

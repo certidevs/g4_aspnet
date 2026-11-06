@@ -41,6 +41,16 @@
                 <div class="collapse navbar-collapse" id="mainNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item"><a class='@NavClass("Home")' asp-controller="Home" asp-action="Index">Inicio</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Help Desk</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Tickets" asp-action="Index">Tickets</a></li>
+                                <li><a class="dropdown-item" asp-controller="TicketComments" asp-action="Index">Comentarios</a></li>
+                                <li><a class="dropdown-item" asp-controller="Projects" asp-action="Index">Proyectos</a></li>
+                                <li><a class="dropdown-item" asp-controller="Companies" asp-action="Index">Empresas</a></li>
+                                <li><a class="dropdown-item" asp-controller="Categories" asp-action="Index">Categorías</a></li>
+                            </ul>
+                        </li>
                         @if (User.IsInRole(RoleNames.Admin))
                         {
                             <li class="nav-item"><a class='@NavClass("Users")' asp-controller="Users" asp-action="Index">Administración de usuarios</a></li>

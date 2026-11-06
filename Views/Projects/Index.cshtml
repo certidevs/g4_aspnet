@@ -1,0 +1,44 @@
+@model IEnumerable<Project>
+@{
+    ViewData["Title"] = "Proyectos";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Proyectos</h1>
+        <p class="text-secondary mb-0">Proyectos de las empresas clientes, con su nivel de soporte.</p>
+    </div>
+    @* DESCOMENTA: <a class="btn btn-primary" asp-action="Create">Nuevo proyecto</a> *@
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Todavía no hay proyectos.</div>
+}
+else
+{
+    <div class="table-responsive border rounded">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>Proyecto</th><th>Empresa</th><th>Nivel de soporte</th><th>Tiempo de respuesta</th><th>Estado</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var project in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@project.Name</td>
+                        <td>@project.Company.Name</td>
+                        <td>@Html.DisplayFor(modelItem => project.SupportLevel)</td>
+                        <td>@project.ResponseTimeHours h</td>
+                        <td><span class="badge @(project.IsActive ? "text-bg-success" : "text-bg-secondary")">@(project.IsActive ? "Activo" : "Inactivo")</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@project.Id">Ver</a>
+                            @* DESCOMENTA: <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@project.Id">Editar</a> *@
+                            @* DESCOMENTA: <form asp-action="Delete" asp-route-id="@project.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este proyecto?')"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form> *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

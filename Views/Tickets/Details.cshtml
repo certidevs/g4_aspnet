@@ -1,0 +1,74 @@
+@model Ticket
+@{
+    ViewData["Title"] = "Detalle de ticket";
+    var priorityClass = Model.Priority switch
+    {
+        TicketPriority.Urgent => "text-bg-danger",
+        TicketPriority.High => "text-bg-warning",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0">@Model.Title</h1>
+    <div class="d-flex gap-2">
+        @* DESCOMENTA: <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Editar</a> *@
+        @* DESCOMENTA: <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar este ticket?')"><button class="btn btn-outline-danger" type="submit">Eliminar</button></form> *@
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Descripción</dt><dd class="col-sm-9">@Model.Description</dd>
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9"><span class="badge text-bg-primary">@Html.DisplayFor(model => model.Status)</span></dd>
+            <dt class="col-sm-3">Prioridad</dt>
+            <dd class="col-sm-9"><span class="badge @priorityClass">@Html.DisplayFor(model => model.Priority)</span></dd>
+            <dt class="col-sm-3">Proyecto</dt>
+            <dd class="col-sm-9">
+                <a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">@Model.Project.Name</a>
+                <span class="text-secondary">· @Model.Project.Company.Name</span>
+            </dd>
+            <dt class="col-sm-3">Categoría</dt>
+            <dd class="col-sm-9"><a asp-controller="Categories" asp-action="Details" asp-route-id="@Model.CategoryId">@Model.Category.Name</a></dd>
+            <dt class="col-sm-3">Creado por</dt><dd class="col-sm-9">@(Model.CreatedBy.DisplayName ?? Model.CreatedBy.UserName)</dd>
+            <dt class="col-sm-3">Técnico asignado</dt><dd class="col-sm-9">@(Model.AssignedTo?.DisplayName ?? Model.AssignedTo?.UserName ?? "Sin asignar")</dd>
+            <dt class="col-sm-3">Creado</dt><dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            <dt class="col-sm-3">Resuelto</dt>
+            <dd class="col-sm-9">@(Model.ResolvedAt is DateTime resolvedAt ? resolvedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Sin resolver")</dd>
+        </dl>
+    </div>
+    <div class="card-footer bg-transparent"><a class="btn btn-outline-secondary" asp-action="Index">Volver a tickets</a></div>
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h2 class="h4 mb-0">Comentarios</h2>
+    @* Los comentarios se crean desde aquí: el botón abre TicketComments/Form con el id de este ticket *@
+    @* DESCOMENTA: <a class="btn btn-sm btn-primary" asp-controller="TicketComments" asp-action="Create" asp-route-ticketId="@Model.Id">Añadir comentario</a> *@
+</div>
+@if (!Model.Comments.Any())
+{
+    <div class="alert alert-info">Este ticket todavía no tiene comentarios.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+        {
+            <div class="list-group-item">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <div>
+                        <span class="fw-semibold">@(comment.Author.DisplayName ?? comment.Author.UserName)</span>
+                        @if (comment.IsInternal)
+                        {
+                            <span class="badge text-bg-warning ms-1">Interno</span>
+                        }
+                    </div>
+                    <span class="small text-secondary">@comment.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+                <p class="mb-0">@comment.Message</p>
+            </div>
+        }
+    </div>
+}

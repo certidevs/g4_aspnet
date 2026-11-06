@@ -1,0 +1,61 @@
+@model Company
+@{
+    // Un solo formulario para crear y para editar: si el Id es 0 la empresa es nueva
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "Nueva empresa" : "Editar empresa";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h2 mb-0">@ViewData["Title"]</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
+</div>
+
+@* asp-action="Save": el formulario se envía por POST a CompaniesController.Save (sirve para crear y para editar).
+   El token antifalsificación se añade solo al ser un form de Razor con method="post". *@
+<form asp-action="Save" method="post" class="card">
+    <div class="card-body p-4">
+        @* Errores generales; los de cada campo salen debajo de su input con asp-validation-for *@
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        @* El Id viaja oculto: 0 al crear, el de la empresa al editar. Save lo usa para saber qué hacer *@
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label asp-for="Name" class="form-label">Nombre</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="TaxId" class="form-label">CIF</label>
+                <input asp-for="TaxId" class="form-control" />
+                <span asp-validation-for="TaxId" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Phone" class="form-label">Teléfono</label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                @* Una casilla (bool) se pinta con form-check *@
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">Activa</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent text-end">
+        <button class="btn btn-primary" type="submit">@(isNew ? "Crear empresa" : "Guardar cambios")</button>
+    </div>
+</form>
+
+@* Scripts de validación en el navegador (jQuery Validation): muestran los errores sin enviar el formulario *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,54 @@
+@model IEnumerable<Ticket>
+@{
+    ViewData["Title"] = "Tickets";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Tickets</h1>
+        <p class="text-secondary mb-0">Incidencias de soporte, de la más reciente a la más antigua.</p>
+    </div>
+    @* DESCOMENTA: <a class="btn btn-primary" asp-action="Create">Nuevo ticket</a> *@
+    @* TODO (issue #17, más adelante): filtros por estado y prioridad *@
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Todavía no hay tickets.</div>
+}
+else
+{
+    <div class="table-responsive border rounded">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>Título</th><th>Proyecto</th><th>Categoría</th><th>Estado</th><th>Prioridad</th><th>Técnico</th><th>Creado</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in Model)
+                {
+                    var priorityClass = ticket.Priority switch
+                    {
+                        TicketPriority.Urgent => "text-bg-danger",
+                        TicketPriority.High => "text-bg-warning",
+                        _ => "text-bg-secondary"
+                    };
+                    <tr>
+                        <td>@ticket.Id</td>
+                        <td class="fw-semibold">@ticket.Title</td>
+                        <td>@ticket.Project.Name</td>
+                        <td>@ticket.Category.Name</td>
+                        <td><span class="badge text-bg-primary">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
+                        <td><span class="badge @priorityClass">@Html.DisplayFor(modelItem => ticket.Priority)</span></td>
+                        <td>@(ticket.AssignedTo?.DisplayName ?? ticket.AssignedTo?.UserName ?? "Sin asignar")</td>
+                        <td>@ticket.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@ticket.Id">Ver</a>
+                            @* DESCOMENTA: <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@ticket.Id">Editar</a> *@
+                            @* DESCOMENTA: <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este ticket?')"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form> *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

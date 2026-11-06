@@ -1,0 +1,45 @@
+@model IEnumerable<TicketComment>
+@{
+    ViewData["Title"] = "Comentarios";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Comentarios</h1>
+        <p class="text-secondary mb-0">Comentarios de los tickets, del más reciente al más antiguo.</p>
+    </div>
+    @* No hay botón "Nuevo comentario" aquí: un comentario siempre pertenece a un ticket, así que se crea desde Tickets/Details (botón "Añadir comentario"). *@
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Todavía no hay comentarios.</div>
+}
+else
+{
+    <div class="table-responsive border rounded">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>Ticket</th><th>Autor</th><th>Mensaje</th><th>Tipo</th><th>Fecha</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var comment in Model)
+                {
+                    <tr>
+                        <td>@comment.Id</td>
+                        <td><a asp-controller="Tickets" asp-action="Details" asp-route-id="@comment.TicketId">@comment.Ticket.Title</a></td>
+                        <td>@(comment.Author.DisplayName ?? comment.Author.UserName)</td>
+                        <td>@(comment.Message.Length > 60 ? comment.Message[..60] + "…" : comment.Message)</td>
+                        <td><span class="badge @(comment.IsInternal ? "text-bg-warning" : "text-bg-secondary")">@(comment.IsInternal ? "Interno" : "Público")</span></td>
+                        <td>@comment.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@comment.Id">Ver</a>
+                            @* DESCOMENTA: <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@comment.Id">Editar</a> *@
+                            @* DESCOMENTA: <form asp-action="Delete" asp-route-id="@comment.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este comentario?')"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form> *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
