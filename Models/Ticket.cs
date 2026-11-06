@@ -18,19 +18,21 @@ public class Ticket
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ResolvedAt { get; set; }
 
-    //Foraneas
+    // Claves foráneas y sus navegaciones
 
-    public int ProjectId {get; set;} 
-    public Project Project {get; set;} = null!;
+    public int ProjectId { get; set; }
+    public Project Project { get; set; } = null!;
 
     public string CreatedById { get; set; } = string.Empty;
     public ApplicationUser CreatedBy { get; set; } = null!;
 
+    // Técnico responsable: opcional (string?), un ticket nuevo todavía no tiene técnico.
     public string? AssignedToId { get; set; }
     public ApplicationUser? AssignedTo { get; set; }
 
-
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
-    public List<TicketComment> Comments { get; set; } = new();
+
+    // Colección inversa de TicketComment.Ticket.
+    public ICollection<TicketComment> Comments { get; set; } = new List<TicketComment>();
 }

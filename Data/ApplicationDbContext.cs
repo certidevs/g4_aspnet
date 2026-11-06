@@ -24,7 +24,11 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
 
-    /// <summary>Configura las columnas añadidas a la tabla de usuarios de Identity.</summary>
+    /// <summary>
+    /// Configura las columnas añadidas a la tabla de usuarios de Identity y las relaciones del dominio.
+    /// Cada relación indica su OnDelete: Cascade solo si el hijo no tiene sentido sin el padre,
+    /// Restrict si es historial o un dato importante (y siempre con ApplicationUser).
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -34,8 +38,9 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(user => user.AvatarFileName).HasMaxLength(260);
             entity.Property(user => user.CreatedAt).IsRequired();
 
+            // Usuario -> Empresa (opcional): Restrict, no se borra una empresa que aún tiene usuarios.
             entity.HasOne(user => user.Company)
-                  .WithMany()
+                  .WithMany(c => c.Users)
                   .HasForeignKey(user => user.CompanyId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
@@ -47,8 +52,9 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         modelBuilder.Entity<Project>(entity =>
         {
+            // Proyecto -> Empresa: Restrict, los proyectos (y sus tickets) son historial de la empresa.
             entity.HasOne(p => p.Company)
-                  .WithMany()
+                  .WithMany(c => c.Projects)
                   .HasForeignKey(p => p.CompanyId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
@@ -65,33 +71,30 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(t => t.Title).HasMaxLength(100);
             entity.Property(t => t.Description).HasMaxLength(2000);
 
-            // Relación con ApplicationUser (creador)
+            // Ticket -> Usuario creador: Restrict, siempre con ApplicationUser (el ticket es historial).
             entity.HasOne(t => t.CreatedBy)
-                  .WithMany()
+                  .WithMany(u => u.CreatedTickets)
                   .HasForeignKey(t => t.CreatedById)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // Relación con ApplicationUser (técnico responsable, opcional)
+            // Ticket -> Usuario técnico (opcional): Restrict, siempre con ApplicationUser (no SetNull).
             entity.HasOne(t => t.AssignedTo)
-                  .WithMany()
+                  .WithMany(u => u.AssignedTickets)
                   .HasForeignKey(t => t.AssignedToId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // Relación con Category
+            // Ticket -> Categoría: Restrict, no se borra una categoría que ya se ha usado en tickets.
             entity.HasOne(t => t.Category)
                   .WithMany(c => c.Tickets)
                   .HasForeignKey(t => t.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // Relación con Project
+            // Ticket -> Proyecto: Restrict, los tickets son el historial de soporte del proyecto.
             entity.HasOne(t => t.Project)
                   .WithMany(p => p.Tickets)
                   .HasForeignKey(t => t.ProjectId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-
-        /* Este "modelBuilder" establece que los comentarios pertenezcan a un ticket y a un autor,
-        Si se elimina, sus comentarios se quitan también. */
 
         modelBuilder.Entity<TicketComment>(entity =>
         {
@@ -99,13 +102,15 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasMaxLength(2000)
                 .IsRequired();
 
+            // Comentario -> Ticket: Cascade, un comentario no tiene sentido sin su ticket.
             entity.HasOne(c => c.Ticket)
                 .WithMany(t => t.Comments)
                 .HasForeignKey(c => c.TicketId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Comentario -> Usuario autor: Restrict, siempre con ApplicationUser (queda el historial de quién escribió).
             entity.HasOne(c => c.Author)
-                .WithMany()
+                .WithMany(u => u.Comments)
                 .HasForeignKey(c => c.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
         });

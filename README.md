@@ -14,7 +14,7 @@ Punto de partida común de todos los grupos: **solo la entidad `ApplicationUser`
 | Cuenta | Registro, login por usuario o email, logout y página de acceso denegado. |
 | Perfil | Consulta y edición del perfil, avatar y cambio de contraseña. |
 | Administración | Panel `/Users` (solo `Admin`): alta, edición, activación y borrado de usuarios. |
-| Datos | Entity Framework Core + SQLite (`App_Data/g4.db`), migración inicial de Identity y datos demo al arrancar. |
+| Datos | Entity Framework Core + SQLite (`App_Data/g4.db`), base recreada y datos demo al arrancar. |
 | Imágenes | `ImageStorage` para guardar imágenes subidas; hoy solo avatares (añadid vuestras carpetas en `ImageFolder`). |
 | Interfaz | Razor + Bootstrap 5 en local, con tema claro/oscuro. |
 | Calidad y despliegue | Proyecto de tests xUnit, GitHub Actions (compilar y testear) y `Dockerfile`. |
@@ -96,36 +96,46 @@ dotnet tool restore
 dotnet run --project G4AspNet.csproj --launch-profile http
 ```
 
-Abre `http://localhost:5107`. El primer arranque crea `App_Data/g4.db`, aplica la migración de Identity y añade los usuarios demo:
+Abre `http://localhost:5107`. El primer arranque crea `App_Data/g4.db`, crea las tablas y añade los usuarios demo:
 
-- `admin` / `Admin123!`
-- `user` / `User123!`
+- `admin` / `Admin123!` (administrador, hace de técnico de soporte en los datos demo)
+- `user` / `User123!` (cliente de TechCorp Solutions)
+- `user2` / `User123!` (cliente de Innovación Digital S.L.)
+- `user3` / `User123!` (cliente de Fundación Horizonte)
 
 ## Trabajo en equipo en GitHub
 
-Todo el grupo tiene permiso de escritura en este repositorio. Para no pisaros el trabajo:
+Todo el grupo tiene permiso de escritura en este repositorio y **se trabaja directamente en `main`**. Para no pisaros el trabajo:
 
-1. **Una rama por tarea**, partiendo de `main` actualizado:
-
-   ```bash
-   git switch main
-   git pull
-   git switch -c feature/nombre-corto
-   ```
-
-2. **Commits pequeños y con mensaje claro** (`feat: ...`, `fix: ...`, `docs: ...`).
-3. **Subid la rama y abrid una Pull Request hacia `main`** (`git push -u origin feature/nombre-corto`). Que la revise al menos otra persona del equipo antes de fusionarla y que el *check* de GitHub Actions esté en verde.
-4. **No hagáis `push` directo a `main` ni `git push --force`.**
-5. Antes de abrir la PR, y cada vez que `main` avance, actualizad vuestra rama: `git pull --rebase origin main`.
+1. **Haced `git pull` antes de empezar a trabajar y siempre antes de cada `git push`.**
+2. **Un commit pequeño por cada cambio**, con un mensaje claro (`feat: ...`, `fix: ...`, `docs: ...`), y subidlo pronto con `git push`.
+3. **No toquéis la entidad, el controlador o las vistas de otra persona sin avisarle.** En la tabla *Entidades y quién las hace* está quién hace cada cosa.
+4. **No hagáis `git push --force`.**
+5. Quien ya sepa usar ramas puede usarlas (una rama por tarea y fusión a `main`), pero no es obligatorio.
 6. Repartid el trabajo con **Issues** (una persona por issue) y, si queréis, un tablero de **Projects**.
 
-### Migraciones de EF Core en equipo
+### Base de datos en desarrollo
 
-Las migraciones (`Data/Migrations`) son lo que más choca al trabajar en paralelo, sobre todo `ApplicationDbContextModelSnapshot.cs`:
+Este proyecto **no usa migraciones**. Al arrancar, la aplicación borra `App_Data/g4.db`, la vuelve a crear a partir de las entidades y carga los datos demo de `Data/DbInitializer.cs` (es el equivalente a `create-drop` con H2 en Spring Boot). Por eso:
 
-- Avisad al equipo antes de crear una migración y fusionad su PR cuanto antes.
-- Si al actualizar con `main` hay conflicto en `Data/Migrations`, no lo resolváis a mano: descartad vuestros cambios en esa carpeta, integrad `main`, borrad vuestra base local (`App_Data/*.db`) y volved a crear la migración con `dotnet ef migrations add`.
-- Nunca editéis ni borréis migraciones que ya estén en `main`.
+- Si cambias una entidad o una relación, **solo tienes que volver a ejecutar la aplicación**.
+- Si haces `git pull` con cambios de otras personas, **solo tienes que volver a ejecutarla**.
+- No hay que ejecutar `dotnet ef` ni borrar la base a mano.
+- Los datos que crees a mano al probar se pierden al reiniciar. Lo que deba existir siempre se añade a `DbInitializer`.
+
+## Entidades y quién las hace
+
+Cada entidad tiene su controlador (en `Controllers/`) y su carpeta de vistas (en `Views/`, con el mismo nombre que el controlador). Hoy ya funcionan `Index` y `Details` de todas. **`Company` es el ejemplo completo** (crear, editar y borrar, para copiar); en el resto, `Create`, `Edit`, `Save`, `Delete` y la vista `Form` ya están escritos pero **comentados** entre los marcadores `DESCOMENTA` de cada controlador y vista: descomentadlos y ajustadlos a vuestra entidad. Los responsables son los asignados en las issues de GitHub.
+
+| Entidad | Controlador | Vistas |
+| --- | --- | --- |
+| `Company` (empresa cliente) | `CompaniesController`: #10, Fraile256 | `Views/Companies`: #11, Fraile256 |
+| `Project` (proyecto) | `ProjectsController`: #12, apemarr | `Views/Projects`: #13, apemarr |
+| `Category` (categoría del ticket) | `CategoriesController`: #14, marcochandotrabajo-oss | `Views/Categories`: #15, marcochandotrabajo-oss |
+| `Ticket` (incidencia) | `TicketsController`: #16, JuanR88 | `Views/Tickets`: #17, apemarr |
+| `TicketComment` (comentario de ticket) | `TicketCommentsController`: #18, LusmaelTk | `Views/TicketComments`: #19, LusmaelTk |
+
+Responsables de las entidades según las issues: `Company` #2 (JuanR88), `Project` #5 (apemarr), `Ticket` y `Category` #6 (JuanR88). `TicketComment` no tiene issue de entidad. Los datos demo (`Data/DbInitializer.cs`) son la issue #20 (marcochandotrabajo-oss). Las entidades de fase 2 (`TechnicianCategory` #7 y `Attachment` #21) todavía no se crean. La issue #9 (regenerar la migración) ya no hace falta: el proyecto no usa migraciones.
 
 ## Comandos de trabajo diario
 
@@ -149,18 +159,7 @@ dotnet test G4AspNet.sln
 
 ### Entity Framework y SQLite
 
-`dotnet-ef` está fijado en `.config/dotnet-tools.json`, por lo que `dotnet tool restore` lo deja disponible sin instalar nada de forma global.
-
-```bash
-# Después de cambiar una entidad: crear y aplicar una migración
-dotnet ef migrations add NombreDescriptivo
-dotnet ef database update
-
-# Corregir la última migración solo antes de aplicarla a la base de datos
-dotnet ef migrations remove
-```
-
-Las migraciones se aplican también al arrancar la aplicación. El comando `database update` se incluye para conocer el flujo explícito.
+La base de datos se recrea al arrancar (ver *Base de datos en desarrollo*): no hay migraciones que crear ni aplicar.
 
 ### CI y Docker
 

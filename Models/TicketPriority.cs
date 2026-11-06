@@ -3,11 +3,11 @@ namespace G4AspNet.Models;
 
 public enum TicketPriority
 {
-    [Display (Name = "Bajo")]
+    [Display (Name = "Baja")]
     Low,
-    [Display (Name = "Medio")]
+    [Display (Name = "Media")]
     Medium,
-    [Display (Name = "Alto")]
+    [Display (Name = "Alta")]
     High,
     [Display (Name = "Urgente")]
     Urgent

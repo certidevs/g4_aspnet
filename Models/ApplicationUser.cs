@@ -14,6 +14,13 @@ public sealed class ApplicationUser : IdentityUser
 
     /// <summary>Permite desactivar una cuenta sin borrar la información futura que posea.</summary>
     public bool IsActive { get; set; } = true;
-    public Company? Company {get; set;}
-    public int? CompanyId {get; set;}
+
+    // Empresa del usuario: opcional (int?), el administrador no pertenece a ninguna empresa cliente.
+    public int? CompanyId { get; set; }
+    public Company? Company { get; set; }
+
+    // Colecciones inversas de las relaciones de Ticket y TicketComment con el usuario.
+    public ICollection<Ticket> CreatedTickets { get; set; } = new List<Ticket>();
+    public ICollection<Ticket> AssignedTickets { get; set; } = new List<Ticket>();
+    public ICollection<TicketComment> Comments { get; set; } = new List<TicketComment>();
 }

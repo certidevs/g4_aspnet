@@ -25,6 +25,9 @@ coverage/
 **/App_Data/*.db
 **/App_Data/*.db-shm
 **/App_Data/*.db-wal
+*.db
+*.db-shm
+*.db-wal
 appsettings.Local.json
 secrets.json
 
