@@ -135,17 +135,25 @@ public class TicketCommentsController : Controller
         }
         else
         {
-            // EDITAR: cargamos el comentario y solo cambiamos el mensaje y si es interno
-            // (el ticket, el autor y la fecha no se modifican)
+            // EDITAR: cargamos el comentario y solo cambiamos el mensaje y si es interno.
             var existing = await context.TicketComments.FindAsync(comment.Id);
+
             if (existing == null)
             {
                 return NotFound();
             }
 
+            // Solo el autor o un administrador pueden guardar cambios.
+            if (!CanManageComment(existing))
+            {
+                return Forbid();
+            }
+
             existing.Message = comment.Message;
             existing.IsInternal = comment.IsInternal;
-            comment.TicketId = existing.TicketId; // para saber a qué ticket volver
+
+            // Conservamos el ticket original para volver a sus detalles.
+            comment.TicketId = existing.TicketId;
         }
 
         await context.SaveChangesAsync();
@@ -158,20 +166,30 @@ public class TicketCommentsController : Controller
     }
 
     // POST: /TicketComments/Delete/1
+    // POST: /TicketComments/Delete/1
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
+        // Buscamos el comentario que se quiere eliminar.
         var comment = await context.TicketComments.FindAsync(id);
+
         if (comment == null)
         {
             return NotFound();
         }
 
-        // Un comentario no tiene nada que dependa de él, así que se puede borrar sin más comprobaciones
+        // Solo el autor o un administrador pueden eliminarlo.
+        if (!CanManageComment(comment))
+        {
+            return Forbid();
+        }
+
         context.TicketComments.Remove(comment);
+
         await context.SaveChangesAsync();
 
         TempData["Message"] = "Comentario eliminado correctamente.";
+
         return RedirectToAction(nameof(Index));
     }
 
