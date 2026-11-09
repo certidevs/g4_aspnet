@@ -62,7 +62,7 @@ public class TicketCommentsController : Controller
 
     // GET: /TicketComments/Edit/1
     // Muestra el mismo formulario, relleno con los datos del comentario
-    public async Task<IActionResult> Edit(int id)
+    /* public async Task<IActionResult> Edit(int id)
     {
         // FindAsync busca por clave primaria y devuelve null si no existe
         var comment = await context.TicketComments.FindAsync(id);
@@ -72,7 +72,26 @@ public class TicketCommentsController : Controller
         }
 
         return View("Form", comment);
+    } */
+
+    public async Task<IActionResult> Edit(int id)
+{
+    // Buscamos el comentario que se quiere editar.
+    var comment = await context.TicketComments.FindAsync(id);
+
+    if (comment == null)
+    {
+        return NotFound();
     }
+
+    // Solo el autor o un administrador pueden editarlo.
+    if (!CanManageComment(comment))
+    {
+        return Forbid();
+    }
+
+    return View("Form", comment);
+}
 
     // POST: /TicketComments/Save
     // Crea o actualiza según el Id: 0 = comentario nuevo, otro valor = comentario que ya existe
@@ -155,6 +174,13 @@ public class TicketCommentsController : Controller
         TempData["Message"] = "Comentario eliminado correctamente.";
         return RedirectToAction(nameof(Index));
     }
-// FIN DESCOMENTA
+
+    // Comprueba si el usuario actual es el autor del comentario o un administrador.
+    private bool CanManageComment(TicketComment comment)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        return User.IsInRole(RoleNames.Admin) || userId == comment.AuthorId;
+    }
 
 }
