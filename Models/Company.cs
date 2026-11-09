@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace G4AspNet.Models;
 
@@ -9,6 +9,10 @@ public class Company
     [Required]
     [StringLength(100)]
     public string Name { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(100)]
+    public string Description { get; set; } = string.Empty;
 
     // CIF: número de identificación fiscal de la empresa (único, ver ApplicationDbContext).
     [Required]
