@@ -41,7 +41,7 @@ public class TicketCommentsController : Controller
         return View(comment);
     }
 
-/* DESCOMENTA DESDE AQUÍ (issue #18): Create, Edit, Save y Delete
+// DESCOMENTA DESDE AQUÍ (issue #18): Create, Edit, Save y Delete
    // Pasos: 1) quita este comentario (borra la primera línea y la última, FIN DESCOMENTA), 2) ajusta los campos de tu entidad, 3) descomenta y ajusta Views/TicketComments/Form.cshtml, 4) descomenta los botones de Index y Details (y el botón "Añadir comentario" de Views/Tickets/Details.cshtml).
    // Modelo a copiar: CompaniesController (ejemplo completo y probado).
    // Los comentarios se crean desde el detalle de un ticket: el botón lleva a Create con el ticketId.
@@ -155,6 +155,6 @@ public class TicketCommentsController : Controller
         TempData["Message"] = "Comentario eliminado correctamente.";
         return RedirectToAction(nameof(Index));
     }
-FIN DESCOMENTA */
+// FIN DESCOMENTA
 
 }
