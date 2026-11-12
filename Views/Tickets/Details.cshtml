@@ -12,7 +12,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h1 class="h2 mb-0">@Model.Title</h1>
     <div class="d-flex gap-2">
-        <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
+        <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Editar</a> 
         <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('¿Eliminar este ticket?')"><button class="btn btn-outline-danger" type="submit">Eliminar</button></form>
     </div>
 </div>
@@ -46,8 +46,6 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
     <h2 class="h4 mb-0">Comentarios</h2>
-    @* Los comentarios se crean desde aquí: el botón abre TicketComments/Form con el id de este ticket *@
-
     <a class="btn btn-sm btn-primary" asp-controller="TicketComments" asp-action="Create" asp-route-ticketId="@Model.Id">Añadir comentario</a>
 </div>
 @if (!Model.Comments.Any())
