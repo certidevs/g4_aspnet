@@ -8,14 +8,12 @@
     <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
 </div>
 
-<div class="alert alert-warning">TODO (issue #17): descomenta el formulario y ajústalo</div>
-
-@* Modelo a copiar: Views/Companies/Form.cshtml (ejemplo completo). Al terminar, borra el aviso amarillo de arriba. *@
-@* DESCOMENTA DESDE AQUÍ
+@* Formulario compartido por Crear y Editar: envía a Save. El tag helper añade solo el token antiforgery *@
 <form asp-action="Save" method="post" class="card">
     <div class="card-body p-4">
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+        @* Id oculto: 0 = ticket nuevo, otro valor = edición. Así Save sabe qué hacer *@
         <input type="hidden" asp-for="Id" />
 
         <div class="row g-3">
@@ -51,6 +49,7 @@
                 </select>
                 <span asp-validation-for="AssignedToId" class="text-danger"></span>
             </div>
+            @* El estado solo se edita en tickets existentes: al crear siempre empieza en Open *@
             @if (Model.Id != 0)
             {
                 <div class="col-md-6">
@@ -66,7 +65,7 @@
     </div>
 </form>
 
+@* Validación en el navegador (jQuery Validation) además de la del servidor con ModelState.IsValid *@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-FIN DESCOMENTA *@

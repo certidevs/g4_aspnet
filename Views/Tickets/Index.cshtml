@@ -8,7 +8,7 @@
         <h1 class="h2 mb-1">Tickets</h1>
         <p class="text-secondary mb-0">Incidencias de soporte, de la más reciente a la más antigua.</p>
     </div>
-    @* DESCOMENTA: <a class="btn btn-primary" asp-action="Create">Nuevo ticket</a> *@
+    <a class="btn btn-primary" asp-action="Create">Nuevo ticket</a>
     @* TODO (issue #17, más adelante): filtros por estado y prioridad *@
 </div>
 
@@ -26,6 +26,7 @@ else
             <tbody>
                 @foreach (var ticket in Model)
                 {
+                    @* Color de la insignia de prioridad: rojo urgente, amarillo alta, gris el resto *@
                     var priorityClass = ticket.Priority switch
                     {
                         TicketPriority.Urgent => "text-bg-danger",
@@ -39,12 +40,14 @@ else
                         <td>@ticket.Category.Name</td>
                         <td><span class="badge text-bg-primary">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
                         <td><span class="badge @priorityClass">@Html.DisplayFor(modelItem => ticket.Priority)</span></td>
+                        @* AssignedTo puede ser null (ticket sin técnico), por eso el "?." y el texto por defecto *@
                         <td>@(ticket.AssignedTo?.DisplayName ?? ticket.AssignedTo?.UserName ?? "Sin asignar")</td>
                         <td>@ticket.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@ticket.Id">Ver</a>
-                            @* DESCOMENTA: <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@ticket.Id">Editar</a> *@
-                            @* DESCOMENTA: <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este ticket?')"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form> *@
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@ticket.Id">Editar</a>
+                            @* Eliminar es un POST con confirmación del navegador *@
+                            <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este ticket?')"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form>
                         </td>
                     </tr>
                 }
