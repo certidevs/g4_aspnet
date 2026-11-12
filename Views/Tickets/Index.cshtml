@@ -26,6 +26,7 @@ else
             <tbody>
                 @foreach (var ticket in Model)
                 {
+                    @* Color de la insignia de prioridad: rojo urgente, amarillo alta, gris el resto *@
                     var priorityClass = ticket.Priority switch
                     {
                         TicketPriority.Urgent => "text-bg-danger",
@@ -39,6 +40,7 @@ else
                         <td>@ticket.Category.Name</td>
                         <td><span class="badge text-bg-primary">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
                         <td><span class="badge @priorityClass">@Html.DisplayFor(modelItem => ticket.Priority)</span></td>
+                        @* AssignedTo puede ser null (ticket sin técnico), por eso el "?." y el texto por defecto *@
                         <td>@(ticket.AssignedTo?.DisplayName ?? ticket.AssignedTo?.UserName ?? "Sin asignar")</td>
                         <td>@ticket.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td class="text-end">

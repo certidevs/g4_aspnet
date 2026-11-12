@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering; // lo necesita el bloque comentado de abajo (SelectList)
 using G4AspNet.Data;
-using G4AspNet.Models; // lo necesita el bloque comentado de abajo (Project)
+using G4AspNet.Models;
+using Microsoft.AspNetCore.Authorization; // lo necesita el bloque comentado de abajo (Project)
 namespace G4AspNet.Controllers;
 
 public class ProjectsController : Controller
@@ -41,12 +42,14 @@ public class ProjectsController : Controller
         return View(project);
     }
 
-/* DESCOMENTA DESDE AQUÍ (issue #12): Create, Edit, Save y Delete
+ 
    // Pasos: 1) quita este comentario (borra la primera línea y la última, FIN DESCOMENTA), 2) ajusta los campos de tu entidad, 3) descomenta y ajusta Views/Projects/Form.cshtml, 4) descomenta los botones de Index y Details.
    // Modelo a copiar: CompaniesController (ejemplo completo y probado).
 
     // GET: /Projects/Create
     // Muestra el formulario vacío. Crear y Editar comparten la vista Views/Projects/Form.cshtml
+    [HttpGet]
+    [Authorize(Roles = RoleNames.Admin)]
     public async Task<IActionResult> Create()
     {
         // El formulario necesita la lista de empresas para su select
@@ -58,6 +61,8 @@ public class ProjectsController : Controller
 
     // GET: /Projects/Edit/1
     // Muestra el mismo formulario, relleno con los datos del proyecto
+    [HttpGet]
+    [Authorize(Roles = RoleNames.Admin)]
     public async Task<IActionResult> Edit(int id)
     {
         // FindAsync busca por clave primaria y devuelve null si no existe
@@ -74,6 +79,7 @@ public class ProjectsController : Controller
     // POST: /Projects/Save
     // Crea o actualiza según el Id: 0 = proyecto nuevo, otro valor = proyecto que ya existe
     [HttpPost]
+    [Authorize(Roles = RoleNames.Admin)]
     public async Task<IActionResult> Save(Project project)
     {
         // El formulario solo envía CompanyId (el select), no el objeto Company. Como Company es no nulo en el modelo,
@@ -120,6 +126,7 @@ public class ProjectsController : Controller
 
     // POST: /Projects/Delete/1
     [HttpPost]
+    [Authorize(Roles = RoleNames.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
         var project = await context.Projects.FindAsync(id);
@@ -151,6 +158,5 @@ public class ProjectsController : Controller
         var companies = await context.Companies.OrderBy(c => c.Name).ToListAsync();
         ViewBag.Companies = new SelectList(companies, "Id", "Name");
     }
-FIN DESCOMENTA */
 
 }

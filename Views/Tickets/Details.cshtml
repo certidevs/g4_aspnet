@@ -17,6 +17,7 @@
     </div>
 </div>
 
+@* Datos del ticket. Project, Category, CreatedBy... están disponibles porque Details los carga con Include *@
 <div class="card mb-4">
     <div class="card-body p-4">
         <dl class="row mb-0">
@@ -35,6 +36,7 @@
             <dt class="col-sm-3">Creado por</dt><dd class="col-sm-9">@(Model.CreatedBy.DisplayName ?? Model.CreatedBy.UserName)</dd>
             <dt class="col-sm-3">Técnico asignado</dt><dd class="col-sm-9">@(Model.AssignedTo?.DisplayName ?? Model.AssignedTo?.UserName ?? "Sin asignar")</dd>
             <dt class="col-sm-3">Creado</dt><dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            @* ResolvedAt es null hasta que el técnico/admin resuelve o cierra el ticket *@
             <dt class="col-sm-3">Resuelto</dt>
             <dd class="col-sm-9">@(Model.ResolvedAt is DateTime resolvedAt ? resolvedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Sin resolver")</dd>
         </dl>

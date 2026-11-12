@@ -41,7 +41,7 @@ public class TicketCommentsController : Controller
         return View(comment);
     }
 
-/* DESCOMENTA DESDE AQUÍ (issue #18): Create, Edit, Save y Delete
+// DESCOMENTA DESDE AQUÍ (issue #18): Create, Edit, Save y Delete
    // Pasos: 1) quita este comentario (borra la primera línea y la última, FIN DESCOMENTA), 2) ajusta los campos de tu entidad, 3) descomenta y ajusta Views/TicketComments/Form.cshtml, 4) descomenta los botones de Index y Details (y el botón "Añadir comentario" de Views/Tickets/Details.cshtml).
    // Modelo a copiar: CompaniesController (ejemplo completo y probado).
    // Los comentarios se crean desde el detalle de un ticket: el botón lleva a Create con el ticketId.
@@ -62,7 +62,7 @@ public class TicketCommentsController : Controller
 
     // GET: /TicketComments/Edit/1
     // Muestra el mismo formulario, relleno con los datos del comentario
-    public async Task<IActionResult> Edit(int id)
+    /* public async Task<IActionResult> Edit(int id)
     {
         // FindAsync busca por clave primaria y devuelve null si no existe
         var comment = await context.TicketComments.FindAsync(id);
@@ -72,7 +72,26 @@ public class TicketCommentsController : Controller
         }
 
         return View("Form", comment);
+    } */
+
+    public async Task<IActionResult> Edit(int id)
+{
+    // Buscamos el comentario que se quiere editar.
+    var comment = await context.TicketComments.FindAsync(id);
+
+    if (comment == null)
+    {
+        return NotFound();
     }
+
+    // Solo el autor o un administrador pueden editarlo.
+    if (!CanManageComment(comment))
+    {
+        return Forbid();
+    }
+
+    return View("Form", comment);
+}
 
     // POST: /TicketComments/Save
     // Crea o actualiza según el Id: 0 = comentario nuevo, otro valor = comentario que ya existe
@@ -116,17 +135,25 @@ public class TicketCommentsController : Controller
         }
         else
         {
-            // EDITAR: cargamos el comentario y solo cambiamos el mensaje y si es interno
-            // (el ticket, el autor y la fecha no se modifican)
+            // EDITAR: cargamos el comentario y solo cambiamos el mensaje y si es interno.
             var existing = await context.TicketComments.FindAsync(comment.Id);
+
             if (existing == null)
             {
                 return NotFound();
             }
 
+            // Solo el autor o un administrador pueden guardar cambios.
+            if (!CanManageComment(existing))
+            {
+                return Forbid();
+            }
+
             existing.Message = comment.Message;
             existing.IsInternal = comment.IsInternal;
-            comment.TicketId = existing.TicketId; // para saber a qué ticket volver
+
+            // Conservamos el ticket original para volver a sus detalles.
+            comment.TicketId = existing.TicketId;
         }
 
         await context.SaveChangesAsync();
@@ -139,22 +166,39 @@ public class TicketCommentsController : Controller
     }
 
     // POST: /TicketComments/Delete/1
+    // POST: /TicketComments/Delete/1
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
+        // Buscamos el comentario que se quiere eliminar.
         var comment = await context.TicketComments.FindAsync(id);
+
         if (comment == null)
         {
             return NotFound();
         }
 
-        // Un comentario no tiene nada que dependa de él, así que se puede borrar sin más comprobaciones
+        // Solo el autor o un administrador pueden eliminarlo.
+        if (!CanManageComment(comment))
+        {
+            return Forbid();
+        }
+
         context.TicketComments.Remove(comment);
+
         await context.SaveChangesAsync();
 
         TempData["Message"] = "Comentario eliminado correctamente.";
+
         return RedirectToAction(nameof(Index));
     }
-FIN DESCOMENTA */
+
+    // Comprueba si el usuario actual es el autor del comentario o un administrador.
+    private bool CanManageComment(TicketComment comment)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        return User.IsInRole(RoleNames.Admin) || userId == comment.AuthorId;
+    }
 
 }
