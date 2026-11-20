@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims; // lo necesita el bloque comentado de abajo (ClaimTypes)
 using Microsoft.AspNetCore.Mvc.Rendering; // lo necesita el bloque comentado de abajo (SelectList)
 using G4AspNet.Data;
-using G4AspNet.Models; // lo necesita el bloque comentado de abajo (Ticket, TicketStatus)
+using G4AspNet.Models;
+using G4AspNet.Utilities; // lo necesita el bloque comentado de abajo (Ticket, TicketStatus)
 namespace G4AspNet.Controllers;
 
 public class TicketsController : Controller
@@ -18,11 +19,16 @@ public class TicketsController : Controller
     // GET: /Tickets
     public IActionResult Index()
     {
+        // Obtenemos el usuario actual que ha hecho login
+        var userId = User.GetRequiredUserId();
         // Include carga el proyecto, la categoría y el técnico de cada ticket para poder mostrarlos
         var tickets = context.Tickets
             .Include(t => t.Project)
             .Include(t => t.Category)
             .Include(t => t.AssignedTo)
+            .Include(t => t.CreatedBy)
+            .ThenInclude(C => C.Company)
+            .Where(t => t.CreatedById == userId)
             .OrderByDescending(t => t.CreatedAt)
             .ToList();
         return View(tickets);
