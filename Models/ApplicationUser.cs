@@ -3,6 +3,7 @@ namespace G4AspNet.Models;
 
 public sealed class ApplicationUser : IdentityUser
 {
+    // Para hacer prueba commit
     /// <summary>Nombre que se enseña en la interfaz; puede ser distinto al login.</summary>
     public string? DisplayName { get; set; }
 

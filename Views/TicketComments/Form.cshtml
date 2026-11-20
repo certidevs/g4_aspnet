@@ -1,4 +1,6 @@
+
 @model TicketComment
+
 @{
     ViewData["Title"] = "Formulario de comentario";
 }
@@ -8,19 +10,21 @@
     <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
 </div>
 
-<div class="alert alert-warning">TODO (issue #19): descomenta el formulario y ajústalo</div>
-
-@* Modelo a copiar: Views/Companies/Form.cshtml (ejemplo completo). Al terminar, borra el aviso amarillo de arriba. *@
-@* DESCOMENTA DESDE AQUÍ
 <form asp-action="Save" method="post" class="card">
     <div class="card-body p-4">
+
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="TicketId" />
 
         <p class="text-secondary">
-            Comentario del <a asp-controller="Tickets" asp-action="Details" asp-route-id="@Model.TicketId">ticket #@Model.TicketId</a>
+            Comentario dels
+            <a asp-controller="Tickets"
+               asp-action="Details"
+               asp-route-id="@Model.TicketId">
+                ticket #@Model.TicketId
+            </a>
         </p>
 
         <div class="row g-3">
@@ -29,20 +33,25 @@
                 <textarea asp-for="Message" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Message" class="text-danger"></span>
             </div>
+
             <div class="col-12">
                 <div class="form-check">
                     <input asp-for="IsInternal" class="form-check-input" />
-                    <label asp-for="IsInternal" class="form-check-label">Comentario interno (solo para el equipo de soporte)</label>
+                    <label asp-for="IsInternal" class="form-check-label">
+                        Comentario interno (solo para el equipo de soporte)
+                    </label>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="card-footer bg-transparent text-end">
-        <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Añadir comentario" : "Guardar cambios")</button>
+        <button class="btn btn-primary" type="submit">
+            @(Model.Id == 0 ? "Añadir comentario" : "Guardar cambios")
+        </button>
     </div>
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-FIN DESCOMENTA *@

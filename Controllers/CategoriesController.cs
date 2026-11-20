@@ -38,20 +38,12 @@ public class CategoriesController : Controller
 
         return View(category);
     }
-
-/* DESCOMENTA DESDE AQUÍ (issue #14): Create, Edit, Save y Delete
-   // Pasos: 1) quita este comentario (borra la primera línea y la última, FIN DESCOMENTA), 2) ajusta los campos de tu entidad, 3) descomenta y ajusta Views/Categories/Form.cshtml, 4) descomenta los botones de Index y Details.
-   // Modelo a copiar: CompaniesController (ejemplo completo y probado).
-
-    // GET: /Categories/Create
-    // Muestra el formulario vacío. Crear y Editar comparten la vista Views/Categories/Form.cshtml
+    [HttpGet]
     public IActionResult Create()
     {
         return View("Form", new Category());
     }
-
-    // GET: /Categories/Edit/1
-    // Muestra el mismo formulario, relleno con los datos de la categoría
+    [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
         // FindAsync busca por clave primaria y devuelve null si no existe
@@ -63,9 +55,6 @@ public class CategoriesController : Controller
 
         return View("Form", category);
     }
-
-    // POST: /Categories/Save
-    // Crea o actualiza según el Id: 0 = categoría nueva, otro valor = categoría que ya existe
     [HttpPost]
     public async Task<IActionResult> Save(Category category)
     {
@@ -110,7 +99,6 @@ public class CategoriesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // POST: /Categories/Delete/1
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
@@ -135,6 +123,6 @@ public class CategoriesController : Controller
         TempData["Message"] = "Categoría eliminada correctamente.";
         return RedirectToAction(nameof(Index));
     }
-FIN DESCOMENTA */
+
 
 }
