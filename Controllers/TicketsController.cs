@@ -21,7 +21,7 @@ public class TicketsController : Controller
     public IActionResult Index()
     {
         // Obtenemos el usuario actual que ha hecho login
-        var userId = User.GetRequiredUserId();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         // Include carga el proyecto, la categoría y el técnico de cada ticket para poder mostrarlos
         var tickets = context.Tickets
             .Include(t => t.Project)
