@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using G4AspNet.Data;
 using G4AspNet.Models;
+using G4AspNet.Utilities; // lo necesita el bloque comentado de abajo (Ticket, TicketStatus)
 namespace G4AspNet.Controllers;
 
 public class TicketsController : Controller
@@ -19,11 +20,16 @@ public class TicketsController : Controller
     // GET: /Tickets
     public IActionResult Index()
     {
-        // preparar la query con las relaciones (Include) y ordenar por fecha
+        // Obtenemos el usuario actual que ha hecho login
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // Include carga el proyecto, la categoría y el técnico de cada ticket para poder mostrarlos
         var tickets = context.Tickets
             .Include(t => t.Project)
             .Include(t => t.Category)
             .Include(t => t.AssignedTo)
+            .Include(t => t.CreatedBy)
+            .ThenInclude(C => C.Company)
+            .Where(t => t.CreatedById == userId)
             .OrderByDescending(t => t.CreatedAt)
             .ToList(); // ejecutar la query
         return View(tickets);
