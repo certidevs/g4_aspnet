@@ -1,0 +1,146 @@
+.table-panel {
+  --table-border-color: #d7e1d8;
+  padding: clamp(.75rem, 2vw, 1.125rem);
+  background-color: #fcfdfb;
+  border: 1px solid var(--table-border-color);
+  border-radius: 1.125rem;
+  box-shadow: 0 .5rem 1.25rem rgba(18, 69, 59, .09);
+}
+
+.table-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .125rem .375rem 1rem;
+}
+
+.table-panel-title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 1.6rem + 1.5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.table-panel-header .btn {
+  border-radius: .625rem;
+  font-weight: 600;
+}
+
+.app-table-scroll {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--table-border-color);
+  border-radius: .75rem;
+}
+
+.app-table {
+  width: 100%;
+  background-color: #fff;
+}
+
+.app-table-wide {
+  min-width: 39rem;
+}
+
+.app-table-primary-column {
+  width: 36%;
+}
+
+.app-table th,
+.app-table td {
+  padding: .625rem clamp(.625rem, 1.5vw, 1.25rem);
+  vertical-align: middle;
+}
+
+.app-table thead {
+  background-color: var(--bs-info-bg-subtle);
+  white-space: nowrap;
+}
+
+.app-table tbody tr {
+  border-top: 1px solid var(--table-border-color);
+}
+
+.app-table tbody tr:hover,
+.app-table tbody tr:focus-within {
+  background-color: #f3f8f4;
+}
+
+.app-table tbody th {
+  font-weight: 600;
+}
+
+.app-table tbody th,
+.app-table tbody td {
+  overflow-wrap: break-word;
+}
+
+.app-table tbody a {
+  text-underline-offset: .18em;
+}
+
+.table-label {
+  display: inline-block;
+  min-width: 5.5rem;
+  padding: .25rem .65rem;
+  background-color: #e8efed;
+  border-radius: .55rem;
+  font-size: .875rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table-label-sage { background-color: #c1d4b9; }
+.table-label-sand { background-color: #efe5ca; }
+.table-label-blue { background-color: #446f7c; color: #fff; }
+.table-label-teal { background-color: #0b4f5c; color: #fff; }
+
+.table-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .25rem;
+}
+
+.table-row-action {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: .5rem;
+  background-color: transparent;
+  color: var(--g4-teal);
+  text-decoration: none;
+}
+
+.table-row-action:hover {
+  background-color: #e0ebe5;
+  color: var(--g4-ink);
+}
+
+.table-row-action-delete:hover {
+  background-color: #fae6e5;
+  color: #932d34;
+}
+
+.app-table-scroll:focus-visible,
+.app-table :focus-visible {
+  outline: 2px solid var(--g4-teal);
+  outline-offset: 2px;
+}
+
+.table-panel-empty {
+  padding: 2.5rem 1rem;
+  border: 1px solid var(--table-border-color);
+  border-radius: .75rem;
+  background-color: #f3f8f4;
+  color: var(--g4-teal);
+  text-align: center;
+}

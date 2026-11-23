@@ -3,63 +3,75 @@
     ViewData["Title"] = "Tickets";
 }
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-            <h1 class="h2 mb-0">Tickets</h1>
-            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>Nuevo ticket</a>
-            @* TODO (issue #17, más adelante): buscador y filtros por estado y prioridad *@
-        </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/tables.css" asp-append-version="true" />
+}
 
-        @if (!Model.Any())
-        {
-            <div class="text-center text-secondary py-5">
-                <i class="bi bi-ticket-perforated display-4"></i>
-                <p class="mt-2 mb-0">Todavía no hay tickets.</p>
-            </div>
-        }
-        else
-        {
-            <div class="table-responsive rounded">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="bg-info-subtle">Incidencia</th>
-                            <th class="bg-info-subtle">Proyecto</th>
-                            <th class="bg-info-subtle">Prioridad</th>
-                            <th class="bg-info-subtle">Estado</th>
-                            <th class="bg-info-subtle"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ticket in Model)
-                        {
-                            var priorityClass = ticket.Priority switch
-                            {
-                                TicketPriority.Urgent => "text-bg-primary",
-                                TicketPriority.High => "text-bg-secondary",
-                                _ => "text-bg-info"
-                            };
-                            var statusClass = ticket.Status switch
-                            {
-                                TicketStatus.Open => "text-bg-secondary",
-                                TicketStatus.Resolved or TicketStatus.Closed => "text-bg-primary",
-                                _ => "text-bg-info"
-                            };
-                            <tr>
-                                <td><a asp-action="Details" asp-route-id="@ticket.Id">@ticket.Title</a></td>
-                                <td>@ticket.Project.Name</td>
-                                <td><span class="badge @priorityClass">@Html.DisplayFor(modelItem => ticket.Priority)</span></td>
-                                <td><span class="badge @statusClass">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
-                                <td class="text-end text-nowrap">
-                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@ticket.Id" title="Editar" aria-label="Editar"><i class="bi bi-pencil"></i></a>
-                                    <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este ticket?')"><button class="btn btn-sm btn-outline-danger" type="submit" title="Eliminar" aria-label="Eliminar"><i class="bi bi-trash"></i></button></form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+<div class="table-panel">
+    <div class="table-panel-header">
+        <h1 class="table-panel-title" id="tickets-heading">Tickets</h1>
+        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="table-panel-empty">
+            <i class="bi bi-ticket-perforated fs-2" aria-hidden="true"></i>
+            <p class="mt-2 mb-0">Todavía no hay tickets.</p>
+        </div>
+    }
+    else
+    {
+        <div class="app-table-scroll" role="region" aria-labelledby="tickets-heading" tabindex="0">
+            <table class="app-table app-table-wide">
+                <thead>
+                    <tr>
+                        <th class="app-table-primary-column" scope="col">Incidencia</th>
+                        <th scope="col">Proyecto</th>
+                        <th scope="col">Prioridad</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col"><span class="visually-hidden">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model)
+                    {
+                        var priorityClass = ticket.Priority switch
+                        {
+                            TicketPriority.Medium => "table-label-sage",
+                            TicketPriority.High => "table-label-blue",
+                            TicketPriority.Urgent => "table-label-teal",
+                            _ => ""
+                        };
+                        var statusClass = ticket.Status switch
+                        {
+                            TicketStatus.Open => "table-label-blue",
+                            TicketStatus.InProgress => "table-label-sage",
+                            TicketStatus.WaitingCustomer => "table-label-sand",
+                            TicketStatus.Resolved => "table-label-teal",
+                            _ => ""
+                        };
+                        <tr>
+                            <th scope="row"><a asp-action="Details" asp-route-id="@ticket.Id">@ticket.Title</a></th>
+                            <td>@ticket.Project.Name</td>
+                            <td><span class="table-label @priorityClass">@Html.DisplayFor(modelItem => ticket.Priority)</span></td>
+                            <td><span class="table-label @statusClass">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
+                            <td>
+                                <div class="table-row-actions">
+                                    <a class="table-row-action" asp-action="Edit" asp-route-id="@ticket.Id" title="Editar" aria-label="Editar ticket">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" onsubmit="return confirm('¿Eliminar este ticket?')">
+                                        <button class="table-row-action table-row-action-delete" type="submit" title="Eliminar" aria-label="Eliminar ticket">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
