@@ -81,9 +81,12 @@
                             <td><span class="table-label @statusClass">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
                             <td>
                                 <div class="table-row-actions">
+                                    @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
+                                    {
                                     <a class="table-row-action" asp-action="Edit" asp-route-id="@ticket.Id" title="Editar" aria-label="Editar ticket">
                                         <i class="bi bi-pencil" aria-hidden="true"></i>
                                     </a>
+                                    }
                                     @if (User.IsInRole(RoleNames.Admin))
                                     {
                                         <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" onsubmit="return confirm('¿Eliminar este ticket?')">
