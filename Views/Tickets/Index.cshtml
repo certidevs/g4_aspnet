@@ -11,13 +11,33 @@
     <div class="table-panel-header">
         <h1 class="table-panel-title" id="tickets-heading">Tickets</h1>
         <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
+        <form asp-action="Index" method="get" class="table-search" role="search">
+            <button class="table-search-action" type="submit" aria-label="Buscar tickets" title="Buscar tickets">
+                <i class="bi bi-search" aria-hidden="true"></i>
+            </button>
+            <input class="table-search-input" type="search" name="search" value="@ViewBag.Search"
+                   placeholder="Buscar ticket…" aria-label="Buscar por título, descripción o proyecto" />
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <a class="table-search-action table-search-clear" asp-action="Index" aria-label="Limpiar búsqueda" title="Limpiar búsqueda">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </a>
+            }
+        </form>
     </div>
 
     @if (!Model.Any())
     {
         <div class="table-panel-empty">
             <i class="bi bi-ticket-perforated fs-2" aria-hidden="true"></i>
-            <p class="mt-2 mb-0">Debe iniciar sesión para ver los tickets.</p>
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <p class="mt-2 mb-0">No se encontraron tickets para "@ViewBag.Search".</p>
+            }
+            else
+            {
+                <p class="mt-2 mb-0">No hay tickets para mostrar.</p>
+            }
         </div>
     }
     else

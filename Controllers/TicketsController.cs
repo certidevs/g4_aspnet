@@ -18,7 +18,7 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets
-    public IActionResult Index()
+    public IActionResult Index(string? search)
     {
         // Obtenemos el usuario actual que ha hecho login
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -36,6 +36,15 @@ public class TicketsController : Controller
         {
             query = query.Where(t => t.CreatedById == userId);
         }
+
+        // búsqueda por título, descripción o nombre del proyecto
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(t => t.Title.Contains(search)
+                || t.Description.Contains(search)
+                || t.Project.Name.Contains(search));
+        }
+        ViewBag.Search = search;
 
         var tickets = query
             .OrderByDescending(t => t.CreatedAt)
