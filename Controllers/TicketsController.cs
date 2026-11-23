@@ -23,13 +23,21 @@ public class TicketsController : Controller
         // Obtenemos el usuario actual que ha hecho login
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         // Include carga el proyecto, la categoría y el técnico de cada ticket para poder mostrarlos
-        var tickets = context.Tickets
+        var query = context.Tickets
             .Include(t => t.Project)
             .Include(t => t.Category)
             .Include(t => t.AssignedTo)
             .Include(t => t.CreatedBy)
             .ThenInclude(C => C.Company)
-            .Where(t => t.CreatedById == userId)
+            .AsQueryable();
+
+        // el administrador ve todos los tickets; el resto solo los suyos
+        if (!User.IsInRole(RoleNames.Admin))
+        {
+            query = query.Where(t => t.CreatedById == userId);
+        }
+
+        var tickets = query
             .OrderByDescending(t => t.CreatedAt)
             .ToList(); // ejecutar la query
         return View(tickets);
