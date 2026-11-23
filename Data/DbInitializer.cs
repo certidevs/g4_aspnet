@@ -65,6 +65,7 @@ public static class DbInitializer
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         await EnsureRoleAsync(roleManager, RoleNames.User);
         await EnsureRoleAsync(roleManager, RoleNames.Admin);
+        await EnsureRoleAsync(roleManager, RoleNames.Technician);
 
         // El admin no pertenece a ninguna empresa (CompanyId vacío); cada cliente (rol User) trabaja en una empresa.
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -76,6 +77,31 @@ public static class DbInitializer
             password: "Admin123!",
             role: RoleNames.Admin);
             
+        // Técnicos de soporte: tampoco pertenecen a ninguna empresa cliente.
+        await EnsureUserAsync(
+            userManager,
+            username: "tecnico1",
+            email: "tecnico1@g4.local",
+            displayName: "Marta Sánchez",
+            password: "Tecnico123!",
+            role: RoleNames.Technician);
+
+        await EnsureUserAsync(
+            userManager,
+            username: "tecnico2",
+            email: "tecnico2@g4.local",
+            displayName: "Pablo Martín",
+            password: "Tecnico123!",
+            role: RoleNames.Technician);
+
+        await EnsureUserAsync(
+            userManager,
+            username: "tecnico3",
+            email: "tecnico3@g4.local",
+            displayName: "Elena Torres",
+            password: "Tecnico123!",
+            role: RoleNames.Technician);
+
         await EnsureUserAsync(
             userManager,
             username: "user",
@@ -123,6 +149,9 @@ public static class DbInitializer
             var baja = await context.Categories.FirstAsync(c => c.Name == "Baja y cancelación");
 
             var admin = await GetUserAsync(userManager, "admin");
+            var tecnico1 = await GetUserAsync(userManager, "tecnico1");
+            var tecnico2 = await GetUserAsync(userManager, "tecnico2");
+            var tecnico3 = await GetUserAsync(userManager, "tecnico3");
             var user1 = await GetUserAsync(userManager, "user");   // empresa 1: TechCorp Solutions
             var user2 = await GetUserAsync(userManager, "user2");  // empresa 2: Innovación Digital S.L.
             var user3 = await GetUserAsync(userManager, "user3");  // empresa 3: Fundación Horizonte
@@ -139,7 +168,7 @@ public static class DbInitializer
                     ProjectId = youtube.Id,
                     CategoryId = software.Id,
                     CreatedById = user1.Id,
-                    AssignedToId = admin.Id
+                    AssignedToId = tecnico1.Id
                 },
                 new Ticket
                 {
@@ -151,7 +180,7 @@ public static class DbInitializer
                     ProjectId = voluntariado.Id,
                     CategoryId = pagos.Id,
                     CreatedById = user3.Id,
-                    AssignedToId = admin.Id
+                    AssignedToId = tecnico2.Id
                 },
                 new Ticket
                 {
@@ -163,7 +192,7 @@ public static class DbInitializer
                     ProjectId = gmail.Id,
                     CategoryId = software.Id,
                     CreatedById = user2.Id,
-                    AssignedToId = admin.Id,
+                    AssignedToId = tecnico3.Id,
                     ResolvedAt = FechaDemo(11, 2, 17, 0)
                 },
                 new Ticket
@@ -176,7 +205,7 @@ public static class DbInitializer
                     ProjectId = youtube.Id,
                     CategoryId = software.Id,
                     CreatedById = user1.Id,
-                    AssignedToId = admin.Id,
+                    AssignedToId = tecnico1.Id,
                     ResolvedAt = FechaDemo(11, 1, 16, 0)
                 },
                 new Ticket
@@ -189,7 +218,7 @@ public static class DbInitializer
                     ProjectId = voluntariado.Id,
                     CategoryId = sugerencia.Id,
                     CreatedById = user3.Id,
-                    AssignedToId = admin.Id
+                    AssignedToId = tecnico2.Id
                 },
                 new Ticket
                 {
@@ -201,7 +230,7 @@ public static class DbInitializer
                     ProjectId = gmail.Id,
                     CategoryId = software.Id,
                     CreatedById = user2.Id,
-                    AssignedToId = admin.Id
+                    AssignedToId = tecnico3.Id
                 },
                 new Ticket
                 {
@@ -213,7 +242,7 @@ public static class DbInitializer
                     ProjectId = youtubeMusic.Id,
                     CategoryId = pagos.Id,
                     CreatedById = user1.Id,
-                    AssignedToId = admin.Id
+                    AssignedToId = tecnico1.Id
                 },
                 new Ticket
                 {
@@ -225,7 +254,7 @@ public static class DbInitializer
                     ProjectId = gmail.Id,
                     CategoryId = baja.Id,
                     CreatedById = user2.Id,
-                    AssignedToId = admin.Id,
+                    AssignedToId = tecnico2.Id,
                     ResolvedAt = FechaDemo(11, 2, 9, 30)
                 },
                 new Ticket
@@ -262,7 +291,7 @@ public static class DbInitializer
                     ProjectId = youtube.Id,
                     CategoryId = pagos.Id,
                     CreatedById = user1.Id,
-                    AssignedToId = admin.Id,
+                    AssignedToId = tecnico3.Id,
                     ResolvedAt = FechaDemo(10, 29, 12, 0)
                 },
                 new Ticket
@@ -275,7 +304,7 @@ public static class DbInitializer
                     ProjectId = voluntariado.Id,
                     CategoryId = otros.Id,
                     CreatedById = user3.Id,
-                    AssignedToId = admin.Id
+                    AssignedToId = tecnico1.Id
                 }
             };
 
