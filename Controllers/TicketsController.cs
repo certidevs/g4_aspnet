@@ -31,8 +31,12 @@ public class TicketsController : Controller
             .ThenInclude(C => C.Company)
             .AsQueryable();
 
-        // el administrador ve todos los tickets; el resto solo los suyos
-        if (!User.IsInRole(RoleNames.Admin))
+        // admin: todos; técnico: los que tiene asignados; cliente: los que ha creado
+        if (User.IsInRole(RoleNames.Technician))
+        {
+            query = query.Where(t => t.AssignedToId == userId);
+        }
+        else if (!User.IsInRole(RoleNames.Admin))
         {
             query = query.Where(t => t.CreatedById == userId);
         }
