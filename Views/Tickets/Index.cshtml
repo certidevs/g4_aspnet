@@ -10,7 +10,10 @@
 <div class="table-panel">
     <div class="table-panel-header">
         <h1 class="table-panel-title" id="tickets-heading">Tickets</h1>
-        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
+        @if (!User.IsInRole(RoleNames.Technician))
+        {
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
+        }
         <form asp-action="Index" method="get" class="table-search" role="search">
             <button class="table-search-action" type="submit" aria-label="Buscar tickets" title="Buscar tickets">
                 <i class="bi bi-search" aria-hidden="true"></i>
