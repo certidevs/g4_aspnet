@@ -16,118 +16,102 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] is null ? "G4 ASP.NET" : $"{ViewData["Title"]} · G4 ASP.NET")</title>
-    <script>
-        (() => {
-            const savedTheme = localStorage.getItem("g4-theme");
-            const theme = savedTheme === "dark" || savedTheme === "light"
-                ? savedTheme
-                : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-            document.documentElement.setAttribute("data-bs-theme", theme);
-        })();
-    </script>
+    <title>@(ViewData["Title"] is null ? "ZolveSolutions" : $"{ViewData["Title"]} · ZolveSolutions")</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <header class="border-bottom">
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container">
-                <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">G4 ASP.NET</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav"
-                        aria-expanded="false" aria-label="Mostrar navegación">
-                    <span class="navbar-toggler-icon"></span>
+<body>
+    <div class="app-shell d-flex flex-column flex-lg-row">
+        <aside class="sidebar d-flex flex-column p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <a class="sidebar-brand d-block flex-grow-1 text-center mb-lg-3" asp-controller="Home" asp-action="Index">
+                    <img class="rounded d-block mx-auto" src="~/logo/logoHelpDesk%20.webp" alt="ZolveSolutions" height="56" />
+                    <span class="d-block fs-3 fw-semibold text-white lh-1 mt-0">Zolve Solutions</span>
+                </a>
+                <button class="btn btn-outline-light btn-sm d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Mostrar navegación">
+                    <i class="bi bi-list"></i>
                 </button>
-                <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class='@NavClass("Home")' asp-controller="Home" asp-action="Index">Inicio</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Help Desk</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Tickets" asp-action="Index">Tickets</a></li>
-                                @if (User.Identity?.IsAuthenticated == true)
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="TicketComments" asp-action="Index">
-                                            Comentarios
-                                        </a>
-                                    </li>
-                                }
-                                <li><a class="dropdown-item" asp-controller="Projects" asp-action="Index">Proyectos</a></li>
-                                <li><a class="dropdown-item" asp-controller="Companies" asp-action="Index">Empresas</a></li>
-                                <li><a class="dropdown-item" asp-controller="Categories" asp-action="Index">Categorías</a></li>
-                            </ul>
-                        </li>
-                        @if (User.IsInRole(RoleNames.Admin))
-                        {
-                            <li class="nav-item"><a class='@NavClass("Users")' asp-controller="Users" asp-action="Index">Administración de usuarios</a></li>
-                        }
-                    </ul>
-                    <ul class="navbar-nav align-items-lg-center gap-lg-2">
-                        <li class="nav-item">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" data-theme-toggle aria-pressed="false">
-                                <span data-theme-label>Tema</span>
-                                <span class="visually-hidden" data-theme-sr-label>Cambiar el tema visual</span>
-                            </button>
-                        </li>
-                        @if (currentUser is not null)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @if (ImageStorage.GetUrl(currentUser.AvatarFileName) is string avatarUrl)
-                                    {
-                                        <img class="avatar" src="@avatarUrl" alt="Avatar de @currentName" />
-                                    }
-                                    else
-                                    {
-                                        <span class="avatar avatar-placeholder">@initial</span>
-                                    }
-                                    <span>@currentName</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index">Mi perfil</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Profile" asp-action="Edit">Editar perfil</a></li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post">
-                                            <button class="dropdown-item text-danger" type="submit">Cerrar sesión</button>
-                                        </form>
-                                    </li>
-                                </ul>
+            </div>
+            <div class="collapse d-lg-flex flex-column flex-grow-1" id="mainNav">
+                <hr class="sidebar-divider d-none d-lg-block" />
+                <ul class="nav flex-column gap-1 mb-auto">
+                    <li class="nav-item"><a class='@NavClass("Home")' asp-controller="Home" asp-action="Index"><i class="bi bi-house"></i>Inicio</a></li>
+                    <li class="nav-item"><a class='@NavClass("Tickets")' asp-controller="Tickets" asp-action="Index"><i class="bi bi-ticket-perforated"></i>Tickets</a></li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><a class='@NavClass("TicketComments")' asp-controller="TicketComments" asp-action="Index"><i class="bi bi-chat-left-text"></i>Comentarios</a></li>
+                    }
+                    <li class="nav-item"><a class='@NavClass("Projects")' asp-controller="Projects" asp-action="Index"><i class="bi bi-folder"></i>Proyectos</a></li>
+                    <li class="nav-item"><a class='@NavClass("Companies")' asp-controller="Companies" asp-action="Index"><i class="bi bi-building"></i>Empresas</a></li>
+                    <li class="nav-item"><a class='@NavClass("Categories")' asp-controller="Categories" asp-action="Index"><i class="bi bi-layers"></i>Categorías</a></li>
+                    @if (User.IsInRole(RoleNames.Admin))
+                    {
+                        <li class="nav-item"><a class='@NavClass("Users")' asp-controller="Users" asp-action="Index"><i class="bi bi-people"></i>Usuarios</a></li>
+                    }
+                </ul>
+                <hr class="sidebar-divider" />
+                @if (currentUser is not null)
+                {
+                    <div class="dropdown dropup">
+                        <a class="sidebar-user dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @if (ImageStorage.GetUrl(currentUser.AvatarFileName) is string avatarUrl)
+                            {
+                                <img class="avatar" src="@avatarUrl" alt="Avatar de @currentName" />
+                            }
+                            else
+                            {
+                                <span class="avatar avatar-placeholder">@initial</span>
+                            }
+                            <span class="small">@currentName</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index"><i class="bi bi-person me-2"></i>Mi perfil</a></li>
+                            <li><a class="dropdown-item" asp-controller="Profile" asp-action="Edit"><i class="bi bi-pencil me-2"></i>Editar perfil</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button>
+                                </form>
                             </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Iniciar sesión</a></li>
-                            <li class="nav-item"><a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Crear cuenta</a></li>
-                        }
-                    </ul>
-                </div>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-light btn-sm" asp-controller="Account" asp-action="Login"><i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión</a>
+                        <a class="btn btn-light btn-sm" asp-controller="Account" asp-action="Register">Crear cuenta</a>
+                    </div>
+                }
             </div>
-        </nav>
-    </header>
+        </aside>
 
-    <main class="container py-4 flex-grow-1">
-        @if (TempData["Message"] is string message)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @message
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        }
-        @if (TempData["Error"] is string error)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @error
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        }
-        @RenderBody()
-    </main>
+        <div class="app-content d-flex flex-column flex-grow-1">
+            <main class="container-fluid px-lg-4 py-4 flex-grow-1">
+                @if (TempData["Message"] is string message)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @message
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                }
+                @if (TempData["Error"] is string error)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                }
+                @RenderBody()
+            </main>
 
-    <footer class="border-top py-3 text-secondary">
-        <div class="container">G4 ASP.NET · Curso ASP.NET Core · .NET 10 · EF Core · SQLite</div>
-    </footer>
+            <footer class="border-top py-3 px-lg-4 text-secondary small">
+                <div class="container-fluid">ZolveSolutions · G4 ASP.NET · .NET 10 · EF Core · SQLite</div>
+            </footer>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

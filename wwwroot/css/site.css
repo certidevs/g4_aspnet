@@ -1,5 +1,80 @@
-/* Bootstrap lleva el estilo de la plantilla. Solo se añade el avatar, que no existe
-   como componente nativo y será común a todos los proyectos de grupo. */
+/* Paleta ZolveSolutions sobre las variables de Bootstrap */
+:root {
+  --g4-ink: #01161e;
+  --g4-teal: #124559;
+  --g4-steel: #598392;
+  --g4-ash: #aec3b0;
+  --g4-beige: #eff6e0;
+
+  --bs-body-bg: var(--g4-beige);
+  --bs-body-color: var(--g4-ink);
+  --bs-primary: var(--g4-teal);
+  --bs-primary-rgb: 18, 69, 89;
+  --bs-secondary: var(--g4-steel);
+  --bs-secondary-rgb: 89, 131, 146;
+  --bs-info: var(--g4-ash);
+  --bs-info-rgb: 174, 195, 176;
+  --bs-info-bg-subtle: #dfe9df;
+  --bs-dark: var(--g4-ink);
+  --bs-dark-rgb: 1, 22, 30;
+  --bs-link-color: var(--g4-teal);
+  --bs-link-color-rgb: 18, 69, 89;
+  --bs-link-hover-color: var(--g4-ink);
+  --bs-link-hover-color-rgb: 1, 22, 30;
+  --bs-border-color: rgba(18, 69, 89, .2);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--g4-teal);
+  --bs-btn-border-color: var(--g4-teal);
+  --bs-btn-hover-bg: var(--g4-ink);
+  --bs-btn-hover-border-color: var(--g4-ink);
+  --bs-btn-active-bg: var(--g4-ink);
+  --bs-btn-active-border-color: var(--g4-ink);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--g4-teal);
+  --bs-btn-border-color: var(--g4-teal);
+  --bs-btn-hover-bg: var(--g4-teal);
+  --bs-btn-hover-border-color: var(--g4-teal);
+  --bs-btn-active-bg: var(--g4-teal);
+  --bs-btn-active-border-color: var(--g4-teal);
+}
+
+/* Sidebar*/
+.sidebar {
+  width: 15rem;
+  background-color: var(--g4-ink);
+  color: var(--g4-beige);
+  flex-shrink: 0;
+}
+
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  color: var(--g4-beige);
+  border-radius: .5rem;
+  padding: .6rem .85rem;
+}
+
+.sidebar .nav-link:hover { background-color: rgba(174, 195, 176, .15); }
+.sidebar .nav-link.active { background-color: var(--g4-teal); color: #fff; }
+.sidebar .sidebar-divider { border-top: 1px solid rgba(174, 195, 176, .25); opacity: 1; }
+.sidebar .sidebar-user { color: var(--g4-beige); text-decoration: none; }
+.sidebar .sidebar-brand img { max-width: 100%; height: auto; }
+
+.app-content { min-width: 0; }
+
+@media (max-width: 991.98px) {
+  .sidebar { width: 100%; }
+}
+
+@media (min-width: 992px) {
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+}
+
 .avatar {
   width: 2rem;
   height: 2rem;
@@ -11,8 +86,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
+  background-color: var(--g4-ash);
+  color: var(--g4-ink);
   font-size: .8rem;
   font-weight: 700;
 }
