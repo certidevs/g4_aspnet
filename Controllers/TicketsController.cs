@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -79,7 +80,8 @@ public class TicketsController : Controller
         return View(ticket);
     }
 
-    // GET: /Tickets/Create
+    // GET: /Tickets/Create - Solo usuarios y admin pueden crear tickets
+    [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin)]
     public async Task<IActionResult> Create()
     {
         // cargar las listas de los selects
@@ -88,7 +90,8 @@ public class TicketsController : Controller
         return View("Form", new Ticket());
     }
 
-    // GET: /Tickets/Edit/1
+    // GET: /Tickets/Edit/1 - Solo admin y técnico pueden editar tickets
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician)]
     public async Task<IActionResult> Edit(int id)
     {
         // buscar el ticket por Id
@@ -103,10 +106,20 @@ public class TicketsController : Controller
         return View("Form", ticket);
     }
 
-    // POST: /Tickets/Save
+    // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Save(Ticket ticket)
     {
+        // crear: cliente o admin; editar: admin o técnico
+        var canSave = ticket.Id == 0
+            ? User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin)
+            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician);
+        if (!canSave)
+        {
+            return Forbid();
+        }
+
         // el formulario no envía estos campos: quitarlos de la validación
         ModelState.Remove(nameof(Ticket.Project));
         ModelState.Remove(nameof(Ticket.Category));
@@ -177,8 +190,9 @@ public class TicketsController : Controller
         return RedirectToAction(nameof(Details), new { id = ticket.Id });
     }
 
-    // POST: /Tickets/Delete/1
+    // POST: /Tickets/Delete/1 - Solo admin puede eliminar tickets
     [HttpPost]
+    [Authorize(Roles = RoleNames.Admin)]
     public async Task<IActionResult> Delete(int id)
     {
         // buscar el ticket
