@@ -14,7 +14,7 @@
         {
             <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
         }
-        <form asp-action="Index" method="get" class="table-search" role="search">
+        <form asp-action="Index" method="get" class="table-search" role="search" id="ticket-filter-form">
             <button class="table-search-action" type="submit" aria-label="Buscar tickets" title="Buscar tickets">
                 <i class="bi bi-search" aria-hidden="true"></i>
             </button>
@@ -28,6 +28,63 @@
             }
         </form>
     </div>
+
+    @if (User.IsInRole(RoleNames.Admin))
+    {
+        <div class="d-flex flex-wrap align-items-end gap-2 px-2 pb-3">
+            <div>
+                <label class="form-label small mb-1" for="f-status">Estado</label>
+                <select id="f-status" name="status" form="ticket-filter-form" class="form-select form-select-sm" onchange="this.form.submit()"
+                        asp-items="Html.GetEnumSelectList<TicketStatus>().Select(i => new SelectListItem(i.Text, i.Value, i.Value == ((int?)ViewBag.Status)?.ToString()))">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label small mb-1" for="f-priority">Prioridad</label>
+                <select id="f-priority" name="priority" form="ticket-filter-form" class="form-select form-select-sm" onchange="this.form.submit()"
+                        asp-items="Html.GetEnumSelectList<TicketPriority>().Select(i => new SelectListItem(i.Text, i.Value, i.Value == ((int?)ViewBag.Priority)?.ToString()))">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label small mb-1" for="f-company">Empresa</label>
+                <select id="f-company" name="companyId" form="ticket-filter-form" class="form-select form-select-sm" onchange="this.form.submit()"
+                        asp-items="(SelectList)ViewBag.Companies">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label small mb-1" for="f-project">Proyecto</label>
+                <select id="f-project" name="projectId" form="ticket-filter-form" class="form-select form-select-sm" onchange="this.form.submit()"
+                        asp-items="(SelectList)ViewBag.Projects">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label small mb-1" for="f-category">Categoría</label>
+                <select id="f-category" name="categoryId" form="ticket-filter-form" class="form-select form-select-sm" onchange="this.form.submit()"
+                        asp-items="(SelectList)ViewBag.Categories">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label small mb-1" for="f-from">Desde</label>
+                <input id="f-from" type="date" name="from" form="ticket-filter-form" class="form-control form-control-sm"
+                       value="@(((DateTime?)ViewBag.From)?.ToString("yyyy-MM-dd"))" onchange="this.form.submit()" />
+            </div>
+            <div>
+                <label class="form-label small mb-1" for="f-to">Hasta</label>
+                <input id="f-to" type="date" name="to" form="ticket-filter-form" class="form-control form-control-sm"
+                       value="@(((DateTime?)ViewBag.To)?.ToString("yyyy-MM-dd"))" onchange="this.form.submit()" />
+            </div>
+            @if ((ViewBag.HasFilters as bool?) == true)
+            {
+                <a class="btn btn-sm btn-outline-secondary" asp-action="Index" asp-route-search="@ViewBag.Search">
+                    <i class="bi bi-x-lg me-1" aria-hidden="true"></i>Quitar filtros
+                </a>
+            }
+        </div>
+    }
 
     @if (!Model.Any())
     {
@@ -49,10 +106,21 @@
             <table class="app-table app-table-wide">
                 <thead>
                     <tr>
+                        @if (User.IsInRole(RoleNames.Admin))
+                        {
+                            <th scope="col"></th>
+                        }
                         <th class="app-table-primary-column" scope="col">Incidencia</th>
                         <th scope="col">Proyecto</th>
                         <th scope="col">Prioridad</th>
                         <th scope="col">Estado</th>
+                        @if (User.IsInRole(RoleNames.Admin))
+                        {
+                            <th scope="col">Empresa</th>
+                            <th scope="col">Creado por</th>
+                            <th scope="col">Técnico</th>
+                            <th scope="col">Creado</th>
+                        }
                         <th scope="col"><span class="visually-hidden">Acciones</span></th>
                     </tr>
                 </thead>
@@ -75,10 +143,21 @@
                             _ => ""
                         };
                         <tr>
+                            @if (User.IsInRole(RoleNames.Admin))
+                            {
+                                <td>#@ticket.Id</td>
+                            }
                             <th scope="row"><a asp-action="Details" asp-route-id="@ticket.Id">@ticket.Title</a></th>
                             <td>@ticket.Project.Name</td>
                             <td><span class="table-label @priorityClass">@Html.DisplayFor(modelItem => ticket.Priority)</span></td>
                             <td><span class="table-label @statusClass">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
+                            @if (User.IsInRole(RoleNames.Admin))
+                            {
+                                <td>@ticket.Project.Company.Name</td>
+                                <td>@(ticket.CreatedBy.DisplayName ?? ticket.CreatedBy.UserName)</td>
+                                <td>@(ticket.AssignedTo?.DisplayName ?? ticket.AssignedTo?.UserName ?? "Sin asignar")</td>
+                                <td>@ticket.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                            }
                             <td>
                                 <div class="table-row-actions">
                                     @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
