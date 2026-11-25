@@ -108,6 +108,7 @@ namespace G4AspNet.Controllers
                 }
 
                 existing.Name = company.Name;
+                existing.Description = company.Description;
                 existing.TaxId = company.TaxId;
                 existing.Email = company.Email;
                 existing.Phone = company.Phone;
