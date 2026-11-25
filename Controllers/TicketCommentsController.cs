@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims; // lo necesita el bloque comentado de abajo (ClaimTypes)
@@ -5,6 +6,10 @@ using G4AspNet.Data;
 using G4AspNet.Models; // lo necesita el bloque comentado de abajo (TicketComment)
 namespace G4AspNet.Controllers;
 
+
+// CÓDIGOS DE LOS PERMISOS DE ACCESO
+
+[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
 public class TicketCommentsController : Controller
 {
     private readonly ApplicationDbContext context;
@@ -17,28 +22,63 @@ public class TicketCommentsController : Controller
     // GET: /TicketComments
     public IActionResult Index()
     {
-        // Include carga el ticket y el autor de cada comentario para poder mostrarlos
-        var comments = context.TicketComments
-            .Include(c => c.Ticket)
-            .Include(c => c.Author)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToList();
-        return View(comments);
+    // Comprobamos si el usuario puede consultar comentarios internos.
+
+    // CONTROL DE PERMISOS PARA VER COMENTARIOS
+
+    bool puedeVerInternos =
+        User.IsInRole(RoleNames.Technician) ||
+        User.IsInRole(RoleNames.Admin);
+
+    // Preparamos la consulta cargando el ticket y el autor.
+    var consulta = context.TicketComments
+        .Include(c => c.Ticket)
+        .Include(c => c.Author)
+        .AsQueryable();
+
+    // Los usuarios normales solo pueden consultar comentarios públicos.
+    if (!puedeVerInternos)
+    {
+        consulta = consulta.Where(c => !c.IsInternal);
+    }
+
+    // Ordenamos los comentarios del más reciente al más antiguo.
+    var comments = consulta
+        .OrderByDescending(c => c.CreatedAt)
+        .ToList();
+
+    return View(comments);
     }
 
     // GET: /TicketComments/Details/1
     public IActionResult Details(int id)
     {
-        var comment = context.TicketComments
-            .Include(c => c.Ticket)
-            .Include(c => c.Author)
-            .FirstOrDefault(c => c.Id == id);
-        if (comment == null)
-        {
-            return NotFound();
-        }
+    // Comprobamos si el usuario puede consultar comentarios internos.
+    bool puedeVerInternos =
+        User.IsInRole(RoleNames.Technician) ||
+        User.IsInRole(RoleNames.Admin);
 
-        return View(comment);
+    // Preparamos la consulta cargando el ticket y el autor.
+    var consulta = context.TicketComments
+        .Include(c => c.Ticket)
+        .Include(c => c.Author)
+        .AsQueryable();
+
+    // Si no tiene permisos, excluimos los comentarios internos.
+    if (!puedeVerInternos)
+    {
+        consulta = consulta.Where(c => !c.IsInternal);
+    }
+
+    // Buscamos el comentario solicitado.
+    var comment = consulta.FirstOrDefault(c => c.Id == id);
+
+    if (comment == null)
+    {
+        return NotFound();
+    }
+
+    return View(comment);
     }
 
 // DESCOMENTA DESDE AQUÍ (issue #18): Create, Edit, Save y Delete
@@ -110,6 +150,18 @@ public class TicketCommentsController : Controller
         if (comment.Id == 0 && userId == null)
         {
             ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para escribir un comentario.");
+        }
+
+        // CONTROL DE PERMISOS PARA CREAR COMENTARIOS INTERNOS
+
+        // Los comentarios internos solo pueden crearlos técnicos y administradores.
+        if (comment.IsInternal &&
+            !User.IsInRole(RoleNames.Technician) &&
+            !User.IsInRole(RoleNames.Admin))
+        {
+            ModelState.AddModelError(
+                nameof(TicketComment.IsInternal),
+                "No tienes permiso para crear comentarios internos.");
         }
 
         // Si algo no valida, volvemos al formulario con los errores
