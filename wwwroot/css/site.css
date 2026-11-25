@@ -1,3 +1,17 @@
+/* Tipografía: Space Grotesk para titulares y Inter para el texto (Google Fonts, cargadas en _Layout). */
+:root {
+  --g4-font-title: "Space Grotesk", system-ui, sans-serif;
+  --g4-font-body: "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --bs-body-font-family: var(--g4-font-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6,
+.zs-metric strong, .zs-title, .sidebar-brand span {
+  font-family: var(--g4-font-title);
+}
+
 /* Paleta ZolveSolutions sobre las variables de Bootstrap */
 :root {
   --g4-ink: #01161e;
@@ -90,4 +104,227 @@
   color: var(--g4-ink);
   font-size: .8rem;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   Página de inicio · panel tipo "bento"
+   ========================================================================== */
+.zs-card {
+  padding: 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 1.25rem;
+  background-color: #fcfdfb;
+  box-shadow: 0 .35rem 1rem rgba(1, 22, 30, .06);
+}
+
+.zs-welcome {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.25rem;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(174, 195, 176, .6), transparent 45%),
+    #fcfdfb;
+}
+
+.zs-eyebrow {
+  margin-bottom: .75rem;
+  color: var(--g4-steel);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.zs-eyebrow i {
+  color: #2E9E6B;
+  font-size: .6rem;
+}
+
+.zs-title {
+  font-size: clamp(2rem, 1.5rem + 2vw, 3.1rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.zs-title span {
+  color: var(--g4-teal);
+  box-shadow: inset 0 -.35em 0 rgba(174, 195, 176, .6);
+}
+
+.zs-lead {
+  max-width: 38rem;
+  margin: 1rem 0 1.5rem;
+  color: var(--g4-steel);
+  font-size: 1.1rem;
+}
+
+.zs-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--g4-ink);
+  border-color: var(--g4-ink);
+}
+
+/* Métricas */
+.zs-metric {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.zs-metric i {
+  font-size: 1.35rem;
+}
+
+.zs-metric strong {
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.zs-metric span {
+  color: var(--g4-steel);
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.zs-metric-open i     { color: #D98324; }
+.zs-metric-progress i { color: var(--g4-steel); }
+.zs-metric-done i     { color: #2E9E6B; }
+.zs-metric-company i  { color: var(--g4-teal); }
+
+.zs-metric-company {
+  background-color: var(--g4-teal);
+  border-color: var(--g4-teal);
+  color: var(--g4-beige);
+}
+
+.zs-metric-company i,
+.zs-metric-company span {
+  color: var(--g4-ash);
+}
+
+.zs-h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+/* Ciclo de vida: línea de tiempo horizontal */
+.zs-flow {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.zs-flow::before {
+  content: "";
+  position: absolute;
+  top: 1.5rem;
+  left: 12%;
+  right: 12%;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--g4-steel) 0 10px, transparent 10px 18px);
+  opacity: .5;
+}
+
+.zs-flow li {
+  position: relative;
+  text-align: center;
+}
+
+.zs-flow-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: .6rem;
+  border-radius: 50%;
+  background-color: var(--g4-teal);
+  box-shadow: 0 0 0 .4rem #fcfdfb;
+  color: var(--g4-beige);
+}
+
+.zs-flow h3 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.zs-flow p {
+  margin: 0;
+  color: var(--g4-steel);
+  font-size: .9rem;
+}
+
+@media (max-width: 767.98px) {
+  .zs-flow { grid-template-columns: 1fr; }
+  .zs-flow::before { display: none; }
+}
+
+/* Niveles de soporte */
+.zs-level h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.zs-level-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: .85rem;
+  background-color: var(--g4-ash);
+  color: var(--g4-ink);
+  font-size: 1.1rem;
+}
+
+.zs-level-standard .zs-level-icon {
+  background-color: var(--g4-steel);
+  color: #fff;
+}
+
+.zs-level-premium {
+  background-color: var(--g4-ink);
+  border-color: var(--g4-ink);
+  color: var(--g4-beige);
+}
+
+.zs-level-premium .zs-level-icon {
+  background-color: #E8B93A;
+  color: var(--g4-ink);
+}
+
+/* Accesos rápidos */
+.zs-quick {
+  color: var(--g4-ink);
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.zs-quick i {
+  margin-bottom: .75rem;
+  color: var(--g4-teal);
+  font-size: 1.6rem;
+}
+
+.zs-quick h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.zs-quick p {
+  margin: 0;
+  color: var(--g4-steel);
+  font-size: .9rem;
+}
+
+.zs-quick:hover {
+  transform: translateY(-3px);
+  border-color: var(--g4-teal);
+  box-shadow: 0 .75rem 1.5rem rgba(18, 69, 89, .15);
 }

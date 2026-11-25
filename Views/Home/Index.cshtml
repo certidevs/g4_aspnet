@@ -1,37 +1,162 @@
+@using G4AspNet.Controllers
+@using G4AspNet.Models
 @{
     ViewData["Title"] = "Inicio";
+    var open = (int)ViewData["OpenTickets"]!;
+    var inProgress = (int)ViewData["InProgressTickets"]!;
+    var resolved = (int)ViewData["ResolvedTickets"]!;
+    var companies = (int)ViewData["Companies"]!;
+    var levels = (List<HomeController.SupportSummary>)ViewData["SupportLevels"]!;
+
+    (string Label, string Icon, string Css, string Text) LevelInfo(SupportLevel level) => level switch
+    {
+        SupportLevel.Basic => ("Básico", "fa-life-ring", "zs-level-basic", "Atención por correo y respuesta en horario laboral."),
+        SupportLevel.Standard => ("Estándar", "fa-headset", "zs-level-standard", "Prioridad media y seguimiento por un técnico asignado."),
+        _ => ("Premium", "fa-crown", "zs-level-premium", "Respuesta prioritaria y técnico dedicado a tu proyecto.")
+    };
 }
 
-<section class="py-4 py-lg-5">
-    <div class="row align-items-center g-4">
+<div class="zs-home">
+
+    <!-- Bento: bienvenida + ilustración -->
+    <div class="row g-3 mb-3">
         <div class="col-lg-8">
-            <p class="text-primary text-uppercase fw-semibold small mb-2">Grupo 4</p>
-            <h1 class="display-5 fw-bold">G4 ASP.NET</h1>
-            <p class="lead text-secondary">La infraestructura transversal ya está preparada. El equipo añadirá las entidades, asociaciones, servicios, controladores y vistas del dominio del proyecto.</p>
-            <div class="d-flex flex-wrap gap-2">
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <a class="btn btn-primary" asp-controller="Profile" asp-action="Index">Ver mi perfil</a>
-                }
-                else
-                {
-                    <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Crear cuenta</a>
-                    <a class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
-                }
-            </div>
+            <section class="zs-card zs-welcome h-100">
+                <p class="zs-eyebrow"><i class="fa-solid fa-circle-dot me-2"></i>Centro de ayuda · Zolve Solutions</p>
+                <h1 class="zs-title">¿En qué podemos <span>ayudarte hoy</span>?</h1>
+                <p class="zs-lead">
+                    Abre un ticket, sigue su estado y habla con el equipo técnico. Todo queda registrado
+                    para que ninguna incidencia se pierda por el camino.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary btn-lg" asp-controller="Tickets" asp-action="Create">
+                        <i class="fa-solid fa-ticket me-2"></i>Abrir un ticket
+                    </a>
+                    <a class="btn btn-outline-primary btn-lg" asp-controller="Tickets" asp-action="Index">
+                        <i class="fa-solid fa-list-check me-2"></i>Ver tickets
+                    </a>
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a class="btn btn-link btn-lg" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                    }
+                </div>
+            </section>
         </div>
         <div class="col-lg-4">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="h5">Incluido desde el primer día</h2>
-                    <ul class="mb-0 ps-3">
-                        <li>Identity, roles y login por cookie</li>
-                        <li>SQLite y Entity Framework Core</li>
-                        <li>Perfil, avatar y cambio de contraseña</li>
-                        <li>Administración de usuarios</li>
-                    </ul>
-                </div>
+            <section class="zs-card zs-art h-100">
+                <img class="img-fluid" src="~/images/hero-soporte.svg" alt="Auricular de soporte con un ticket resuelto y burbujas de chat" />
+            </section>
+        </div>
+    </div>
+
+    <!-- Bento: métricas -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+            <div class="zs-card zs-metric zs-metric-open h-100">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <strong>@open</strong>
+                <span>Tickets abiertos</span>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="zs-card zs-metric zs-metric-progress h-100">
+                <i class="fa-solid fa-spinner"></i>
+                <strong>@inProgress</strong>
+                <span>En curso</span>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="zs-card zs-metric zs-metric-done h-100">
+                <i class="fa-solid fa-circle-check"></i>
+                <strong>@resolved</strong>
+                <span>Resueltos</span>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="zs-card zs-metric zs-metric-company h-100">
+                <i class="fa-solid fa-building"></i>
+                <strong>@companies</strong>
+                <span>Empresas atendidas</span>
             </div>
         </div>
     </div>
-</section>
+
+    <!-- Bento: ciclo de vida -->
+    <section class="zs-card mb-3">
+        <h2 class="zs-h2">Así avanza un ticket</h2>
+        <ol class="zs-flow list-unstyled mb-0">
+            <li>
+                <span class="zs-flow-dot"><i class="fa-solid fa-inbox"></i></span>
+                <h3>Abierto</h3>
+                <p>Describes el problema y eliges proyecto y categoría.</p>
+            </li>
+            <li>
+                <span class="zs-flow-dot"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+                <h3>En progreso</h3>
+                <p>Un técnico lo asume y empieza a trabajar.</p>
+            </li>
+            <li>
+                <span class="zs-flow-dot"><i class="fa-solid fa-comments"></i></span>
+                <h3>Espera de cliente</h3>
+                <p>Si necesita más datos, te los pedimos en los comentarios.</p>
+            </li>
+            <li>
+                <span class="zs-flow-dot"><i class="fa-solid fa-flag-checkered"></i></span>
+                <h3>Resuelto</h3>
+                <p>Confirmas la solución y el ticket se cierra.</p>
+            </li>
+        </ol>
+    </section>
+
+    <!-- Bento: niveles de soporte -->
+    <section class="mb-3">
+        <h2 class="zs-h2">Niveles de soporte</h2>
+        <div class="row g-3">
+            @foreach (var summary in levels)
+            {
+                var info = LevelInfo(summary.Level);
+                <div class="col-md-4">
+                    <div class="zs-card zs-level @info.Css h-100">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <span class="zs-level-icon"><i class="fa-solid @info.Icon"></i></span>
+                            <h3 class="mb-0">@info.Label</h3>
+                        </div>
+                        <p>@info.Text</p>
+                        <ul class="list-unstyled mb-0 small">
+                            <li><i class="fa-solid fa-folder-open fa-fw me-1"></i>@summary.Projects @(summary.Projects == 1 ? "proyecto activo" : "proyectos activos")</li>
+                            @if (summary.BestResponseHours is int hours)
+                            {
+                                <li><i class="fa-regular fa-clock fa-fw me-1"></i>Desde @hours h de respuesta</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Bento: accesos rápidos -->
+    <section class="row g-3">
+        <div class="col-md-4">
+            <a class="zs-card zs-quick d-block h-100" asp-controller="Projects" asp-action="Index">
+                <i class="fa-solid fa-folder-tree"></i>
+                <h3>Proyectos</h3>
+                <p>Consulta los proyectos y su nivel de soporte.</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="zs-card zs-quick d-block h-100" asp-controller="Companies" asp-action="Index">
+                <i class="fa-solid fa-building"></i>
+                <h3>Empresas</h3>
+                <p>Clientes registrados y sus datos de contacto.</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a class="zs-card zs-quick d-block h-100" asp-controller="Categories" asp-action="Index">
+                <i class="fa-solid fa-layer-group"></i>
+                <h3>Categorías</h3>
+                <p>Clasifica cada incidencia para encontrarla antes.</p>
+            </a>
+        </div>
+    </section>
+</div>

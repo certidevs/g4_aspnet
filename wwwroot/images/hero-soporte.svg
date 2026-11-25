@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" role="img" aria-label="Ilustración de un auricular de soporte con un ticket y burbujas de chat">
+  <title>Soporte técnico</title>
+  <rect width="400" height="320" fill="none"/>
+  <circle cx="200" cy="160" r="128" fill="#124559"/>
+  <circle cx="200" cy="160" r="96" fill="#1B5C73" opacity=".7"/>
+  <!-- ticket -->
+  <g transform="translate(212 170) rotate(8)">
+    <path d="M0 0 h116 a8 8 0 0 1 8 8 v22 a12 12 0 0 0 0 24 v22 a8 8 0 0 1 -8 8 h-116 a8 8 0 0 1 -8 -8 v-22 a12 12 0 0 0 0 -24 v-22 a8 8 0 0 1 8 -8 Z" fill="#EFF6E0"/>
+    <line x1="30" y1="14" x2="30" y2="86" stroke="#AEC3B0" stroke-width="2" stroke-dasharray="4 4"/>
+    <rect x="44" y="22" width="60" height="8" rx="4" fill="#124559"/>
+    <rect x="44" y="40" width="48" height="6" rx="3" fill="#598392"/>
+    <rect x="44" y="54" width="56" height="6" rx="3" fill="#598392"/>
+    <circle cx="14" cy="50" r="6" fill="#124559"/>
+    <path d="M80 72 l8 8 l16 -16" stroke="#2E9E6B" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- auricular -->
+  <g>
+    <path d="M110 164 a80 80 0 0 1 160 0" fill="none" stroke="#01161E" stroke-width="16" stroke-linecap="round"/>
+    <path d="M110 164 a80 80 0 0 1 160 0" fill="none" stroke="#AEC3B0" stroke-width="8" stroke-linecap="round"/>
+    <rect x="88" y="150" width="40" height="72" rx="18" fill="#01161E"/>
+    <rect x="96" y="160" width="24" height="52" rx="12" fill="#598392"/>
+    <rect x="252" y="150" width="40" height="72" rx="18" fill="#01161E"/>
+    <rect x="260" y="160" width="24" height="52" rx="12" fill="#598392"/>
+    <path d="M110 214 q0 40 60 44" fill="none" stroke="#01161E" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="176" cy="258" r="10" fill="#01161E"/>
+    <circle cx="176" cy="258" r="5" fill="#AEC3B0"/>
+  </g>
+  <!-- burbujas -->
+  <g>
+    <path d="M56 56 h86 a14 14 0 0 1 14 14 v28 a14 14 0 0 1 -14 14 h-52 l-20 18 v-18 h-14 a14 14 0 0 1 -14 -14 v-28 a14 14 0 0 1 14 -14 Z" fill="#EFF6E0"/>
+    <circle cx="82" cy="84" r="5" fill="#124559"/><circle cx="102" cy="84" r="5" fill="#124559"/><circle cx="122" cy="84" r="5" fill="#124559"/>
+    <path d="M300 40 h60 a12 12 0 0 1 12 12 v20 a12 12 0 0 1 -12 12 h-8 v16 l-20 -16 h-32 a12 12 0 0 1 -12 -12 v-20 a12 12 0 0 1 12 -12 Z" fill="#AEC3B0"/>
+    <path d="M308 62 h44" stroke="#01161E" stroke-width="5" stroke-linecap="round"/>
+    <path d="M308 76 h28" stroke="#124559" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- destellos -->
+  <g stroke="#EFF6E0" stroke-width="4" stroke-linecap="round">
+    <line x1="340" y1="236" x2="340" y2="256"/><line x1="330" y1="246" x2="350" y2="246"/>
+    <line x1="54" y1="244" x2="54" y2="258"/><line x1="47" y1="251" x2="61" y2="251"/>
+  </g>
+</svg>

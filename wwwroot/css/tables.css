@@ -18,7 +18,7 @@
 
 .table-panel-title {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--g4-font-title, Georgia, serif);
   font-size: clamp(2rem, 1.6rem + 1.5vw, 3rem);
   font-weight: 700;
   line-height: 1.05;
