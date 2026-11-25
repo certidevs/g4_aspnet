@@ -1,5 +1,6 @@
 using G4AspNet.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace G4AspNet.Controllers;
@@ -12,6 +13,7 @@ public sealed class HomeController : Controller
         return View();
     }
 
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error() => View(new ErrorViewModel
     {
