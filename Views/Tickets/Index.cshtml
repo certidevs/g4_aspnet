@@ -10,7 +10,10 @@
 <div class="table-panel">
     <div class="table-panel-header">
         <h1 class="table-panel-title" id="tickets-heading">Tickets</h1>
-        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
+        @if (!User.IsInRole(RoleNames.Technician))
+        {
+            <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
+        }
         <form asp-action="Index" method="get" class="table-search" role="search">
             <button class="table-search-action" type="submit" aria-label="Buscar tickets" title="Buscar tickets">
                 <i class="bi bi-search" aria-hidden="true"></i>
@@ -78,14 +81,20 @@
                             <td><span class="table-label @statusClass">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
                             <td>
                                 <div class="table-row-actions">
+                                    @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
+                                    {
                                     <a class="table-row-action" asp-action="Edit" asp-route-id="@ticket.Id" title="Editar" aria-label="Editar ticket">
                                         <i class="bi bi-pencil" aria-hidden="true"></i>
                                     </a>
-                                    <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" onsubmit="return confirm('¿Eliminar este ticket?')">
-                                        <button class="table-row-action table-row-action-delete" type="submit" title="Eliminar" aria-label="Eliminar ticket">
-                                            <i class="bi bi-trash" aria-hidden="true"></i>
-                                        </button>
-                                    </form>
+                                    }
+                                    @if (User.IsInRole(RoleNames.Admin))
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@ticket.Id" method="post" onsubmit="return confirm('¿Eliminar este ticket?')">
+                                            <button class="table-row-action table-row-action-delete" type="submit" title="Eliminar" aria-label="Eliminar ticket">
+                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    }
                                 </div>
                             </td>
                         </tr>
