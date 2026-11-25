@@ -101,6 +101,14 @@ public static class DbInitializer
             displayName: "Elena Torres",
             password: "Tecnico123!",
             role: RoleNames.Technician);
+        
+        await EnsureUserAsync(
+            userManager,
+            username: "TecnicoSuperior1",
+            email: "tecnicosuperior1@g4.local",
+            displayName: "Alejandro Tocallez",
+            password: "Ts123!",
+            role: RoleNames.AdminTechnician);
 
         await EnsureUserAsync(
             userManager,
