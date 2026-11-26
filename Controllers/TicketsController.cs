@@ -137,7 +137,18 @@ public class TicketsController : Controller
         {
             ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para crear un ticket.");
         }
-
+        // cliente: el proyecto es el de su empresa, no se elige
+        if (ticket.Id == 0 && !User.IsInRole(RoleNames.Admin))
+        {
+            ticket.ProjectId = await context.Projects
+                .Where(p => p.Company.Users.Any(u => u.Id == userId))
+                .Select(p => p.Id)
+                .FirstOrDefaultAsync();
+            if (ticket.ProjectId == 0)
+            {
+                ModelState.AddModelError(string.Empty, "Tu empresa no tiene ningún proyecto.");
+            }
+        }
         // si no valida, volver al formulario con los errores
         if (!ModelState.IsValid)
         {

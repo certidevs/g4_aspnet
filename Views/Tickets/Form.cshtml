@@ -30,11 +30,16 @@
                 <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
+            @if (User.IsInRole(RoleNames.Admin) || Model.Id != 0)
+            {
+
             <div class="col-md-6">
                 <label asp-for="ProjectId" class="form-label">Proyecto</label>
                 <select asp-for="ProjectId" asp-items="(SelectList)ViewBag.Projects" class="form-select"></select>
                 <span asp-validation-for="ProjectId" class="text-danger"></span>
             </div>
+
+            }
             <div class="col-md-6">
                 <label asp-for="CategoryId" class="form-label">Categoría</label>
                 <select asp-for="CategoryId" asp-items="(SelectList)ViewBag.Categories" class="form-select"></select>
