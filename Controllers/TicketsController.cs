@@ -84,6 +84,20 @@ public class TicketsController : Controller
     [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin)]
     public async Task<IActionResult> Create()
     {
+        var userId = User.GetRequiredUserId();
+
+        // Si la empresa del usuario está inactiva, no puede crear un ticket
+        if (!User.IsInRole(RoleNames.Admin))
+        {
+            var activeCompany = await context.Users
+                .AnyAsync(u => u.Id == userId && u.Company != null && u.Company.IsActive);
+
+            if (!activeCompany)
+            {
+                TempData["Error"] = "Tu empresa no está activa.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
         // cargar las listas de los selects
         await LoadSelectListsAsync();
         // mismo formulario que Edit, con un ticket vacío
