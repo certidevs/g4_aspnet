@@ -126,29 +126,13 @@ public class TicketsController : Controller
         ModelState.Remove(nameof(Ticket.CreatedBy));
         ModelState.Remove(nameof(Ticket.CreatedById));
 
-        if (ticket.Id == 0)
-        {
-            ModelState.Remove(nameof(Ticket.AssignedToId));
-        }
-
         // Id del usuario logueado
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (ticket.Id == 0 && userId == null)
         {
             ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para crear un ticket.");
         }
-        // cliente: el proyecto es el de su empresa, no se elige
-        if (ticket.Id == 0 && !User.IsInRole(RoleNames.Admin))
-        {
-            ticket.ProjectId = await context.Projects
-                .Where(p => p.Company.Users.Any(u => u.Id == userId))
-                .Select(p => p.Id)
-                .FirstOrDefaultAsync();
-            if (ticket.ProjectId == 0)
-            {
-                ModelState.AddModelError(string.Empty, "Tu empresa no tiene ningún proyecto.");
-            }
-        }
+
         // si no valida, volver al formulario con los errores
         if (!ModelState.IsValid)
         {
@@ -162,15 +146,9 @@ public class TicketsController : Controller
         {
             // crear: estado Open, fecha y creador los pone el servidor
             ticket.Status = TicketStatus.Open;
-            if (!User.IsInRole(RoleNames.Admin))
-            {
-                ticket.AssignedToId = null; // no asignado al crear
-            }
-
             ticket.CreatedAt = DateTime.UtcNow;
             ticket.CreatedById = userId!;
             context.Tickets.Add(ticket);
-
         }
         else
         {

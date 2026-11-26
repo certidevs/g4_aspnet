@@ -101,6 +101,7 @@ public sealed class UsersController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = RoleNames.TeamLeader)]
     public IActionResult Delete(string id)
     {
         var model = userService.GetProfile(id);
