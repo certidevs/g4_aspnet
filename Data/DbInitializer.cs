@@ -66,6 +66,7 @@ public static class DbInitializer
         await EnsureRoleAsync(roleManager, RoleNames.User);
         await EnsureRoleAsync(roleManager, RoleNames.Admin);
         await EnsureRoleAsync(roleManager, RoleNames.Technician);
+        await EnsureRoleAsync(roleManager, RoleNames.TeamLeader);
 
         // El admin no pertenece a ninguna empresa (CompanyId vacío); cada cliente (rol User) trabaja en una empresa.
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -104,11 +105,11 @@ public static class DbInitializer
         
         await EnsureUserAsync(
             userManager,
-            username: "TecnicoSuperior1",
-            email: "tecnicosuperior1@g4.local",
+            username: "TecnicoSuperior",
+            email: "tecnicosuperior@g4.local",
             displayName: "Alejandro Tocallez",
-            password: "Ts123!",
-            role: RoleNames.AdminTechnician);
+            password: "Ts1234567!",
+            role: RoleNames.TeamLeader);
 
         await EnsureUserAsync(
             userManager,
@@ -507,12 +508,13 @@ public static class DbInitializer
                 CompanyId = companyId
             };
             var createResult = await userManager.CreateAsync(user, password);
+            
             if (!createResult.Succeeded)
             {
                 throw new InvalidOperationException($"No se pudo crear el usuario demo {username}.");
             }
         }
-
+        
         if (!await userManager.IsInRoleAsync(user, role))
         {
             var roleResult = await userManager.AddToRoleAsync(user, role);
