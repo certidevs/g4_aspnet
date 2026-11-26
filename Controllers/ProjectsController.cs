@@ -164,7 +164,7 @@ public class ProjectsController : Controller
     // GET: /Projects/MisProyectos
     // Muestra únicamente los proyectos asignados al jefe de equipo que ha iniciado sesión.
     [HttpGet]
-    [Authorize(Roles = RoleNames.TeamLider)]
+    [Authorize(Roles = RoleNames.TeamLeader)]
     public async Task<IActionResult> MisProyectos()
     {
         // Obtenemos el identificador del usuario autenticado.

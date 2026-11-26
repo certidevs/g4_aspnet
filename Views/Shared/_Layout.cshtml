@@ -52,7 +52,7 @@
                     }
                     <li class="nav-item"><a class='@NavClass("Projects")' asp-controller="Projects" asp-action="Index"><i class="bi bi-folder"></i>Proyectos</a></li>
 
-                    @if (User.IsInRole(RoleNames.TeamLider))
+                    @if (User.IsInRole(RoleNames.TeamLeader))
                     {
                         <li class="nav-item">
                             <a class='@NavClass("Projects")'
