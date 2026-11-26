@@ -23,4 +23,8 @@ public class Project
     public int CompanyId { get; set; }
     public Company Company { get; set; } = null!;
     public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+
+    /// <summary>Usuarios responsables de gestionar este proyecto como jefes de equipo.</summary>
+    public ICollection<ProjectManager> ManagerAssignments { get; set; }
+    = new List<ProjectManager>();
 }

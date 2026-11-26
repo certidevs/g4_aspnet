@@ -218,7 +218,7 @@ public class TicketCommentsController : Controller
     }
 
     // POST: /TicketComments/Delete/1
-    // POST: /TicketComments/Delete/1
+
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {

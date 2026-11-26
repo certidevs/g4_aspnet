@@ -7,4 +7,6 @@ public static class RoleNames
     public const string User = "User"; //Cliente 
     public const string TeamLeader = "TeamLeader";
     public const string Technician  = "Technician";
+
+    public const string TeamLider = "TeamLider"; //Líder de equipos técnicos
 }

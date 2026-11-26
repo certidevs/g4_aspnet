@@ -24,4 +24,9 @@ public sealed class ApplicationUser : IdentityUser
     public ICollection<Ticket> CreatedTickets { get; set; } = new List<Ticket>();
     public ICollection<Ticket> AssignedTickets { get; set; } = new List<Ticket>();
     public ICollection<TicketComment> Comments { get; set; } = new List<TicketComment>();
+
+    /// <summary>Proyectos que gestiona el usuario como jefe de equipo.</summary>
+    public ICollection<ProjectManager> ManagedProjectAssignments { get; set; }
+    = new List<ProjectManager>();
+
 }

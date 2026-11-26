@@ -22,6 +22,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Company> Companies => Set<Company>();
 
+    public DbSet<ProjectManager> ProjectManagers => Set<ProjectManager>();
+
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
 
     /// <summary>
@@ -114,5 +116,30 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(c => c.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+
+        modelBuilder.Entity<ProjectManager>(entity =>
+        {
+            // La combinación de usuario y proyecto debe ser única.
+            entity.HasKey(pm => new
+            {
+                pm.ApplicationUserId,
+                pm.ProjectId
+            });
+
+            // Relación entre la asignación y el jefe de equipo.
+            entity.HasOne(pm => pm.ApplicationUser)
+                .WithMany(u => u.ManagedProjectAssignments)
+                .HasForeignKey(pm => pm.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación entre la asignación y el proyecto.
+            entity.HasOne(pm => pm.Project)
+                .WithMany(p => p.ManagerAssignments)
+                .HasForeignKey(pm => pm.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+
     }
 }

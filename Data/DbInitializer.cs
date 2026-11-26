@@ -79,6 +79,16 @@ public static class DbInitializer
             role: RoleNames.Admin);
             
         // Técnicos de soporte: tampoco pertenecen a ninguna empresa cliente.
+        
+        // Jefe de equipo de demostración.
+        await EnsureUserAsync(
+            userManager,
+            username: "jefe",
+            email: "jefe@g4.local",
+            displayName: "Jefe de equipo demo",
+            password: "Jefe123!",
+            role: RoleNames.TeamLeader);
+        
         await EnsureUserAsync(
             userManager,
             username: "tecnico1",
@@ -137,6 +147,38 @@ public static class DbInitializer
             password: "User123!",
             role: RoleNames.User,
             companyId: 3);
+
+        
+        // 4.1. Asignar proyectos al jefe de equipo de demostración.
+        var jefeEquipo = await GetUserAsync(userManager, "jefe");
+
+        var proyectoYoutube = await context.Projects
+            .FirstAsync(p => p.Name == "Youtube");
+
+        var proyectoYoutubeMusic = await context.Projects
+            .FirstAsync(p => p.Name == "YoutubeMusic");
+
+        /* Evitamos duplicar las asignaciones si se ejecuta el inicializador
+        sin recrear la base de datos. */
+        if (!await context.ProjectManagers.AnyAsync(
+            pm => pm.ApplicationUserId == jefeEquipo.Id))
+        {
+            context.ProjectManagers.AddRange(
+                new ProjectManager
+                {
+                    ApplicationUserId = jefeEquipo.Id,
+                    ProjectId = proyectoYoutube.Id
+                },
+                new ProjectManager
+                {
+                    ApplicationUserId = jefeEquipo.Id,
+                    ProjectId = proyectoYoutubeMusic.Id
+                }
+            );
+
+            await context.SaveChangesAsync();
+        }
+
 
         // 5. Crear Tickets demo (solo si no existen y asegurando que las FK apunten a registros reales).
         //    Hay tickets en todos los estados y prioridades, de varios proyectos y categorías.

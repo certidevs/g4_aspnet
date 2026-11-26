@@ -51,6 +51,19 @@
                         <li class="nav-item"><a class='@NavClass("TicketComments")' asp-controller="TicketComments" asp-action="Index"><i class="bi bi-chat-left-text"></i>Comentarios</a></li>
                     }
                     <li class="nav-item"><a class='@NavClass("Projects")' asp-controller="Projects" asp-action="Index"><i class="bi bi-folder"></i>Proyectos</a></li>
+
+                    @if (User.IsInRole(RoleNames.TeamLider))
+                    {
+                        <li class="nav-item">
+                            <a class='@NavClass("Projects")'
+                            asp-controller="Projects"
+                            asp-action="MisProyectos">
+                                <i class="bi bi-folder2-open"></i>Mis proyectos
+                            </a>
+                        </li>
+                    }
+
+
                     <li class="nav-item"><a class='@NavClass("Companies")' asp-controller="Companies" asp-action="Index"><i class="bi bi-building"></i>Empresas</a></li>
                     <li class="nav-item"><a class='@NavClass("Categories")' asp-controller="Categories" asp-action="Index"><i class="bi bi-layers"></i>Categorías</a></li>
                     @if (User.IsInRole(RoleNames.Admin))

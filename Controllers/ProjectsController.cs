@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering; // lo necesita el bloque comentado de 
 using G4AspNet.Data;
 using G4AspNet.Models;
 using Microsoft.AspNetCore.Authorization; // lo necesita el bloque comentado de abajo (Project)
+using System.Security.Claims;
 namespace G4AspNet.Controllers;
 
 public class ProjectsController : Controller
@@ -158,5 +159,34 @@ public class ProjectsController : Controller
         var companies = await context.Companies.OrderBy(c => c.Name).ToListAsync();
         ViewBag.Companies = new SelectList(companies, "Id", "Name");
     }
+
+    
+    // GET: /Projects/MisProyectos
+    // Muestra únicamente los proyectos asignados al jefe de equipo que ha iniciado sesión.
+    [HttpGet]
+    [Authorize(Roles = RoleNames.TeamLider)]
+    public async Task<IActionResult> MisProyectos()
+    {
+        // Obtenemos el identificador del usuario autenticado.
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId == null)
+        {
+            return Forbid();
+        }
+
+        // Buscamos las asignaciones del usuario y cargamos sus proyectos y empresas.
+        var proyectos = await context.ProjectManagers
+            .Where(pm => pm.ApplicationUserId == userId)
+            .Include(pm => pm.Project)
+                .ThenInclude(p => p.Company)
+            .Select(pm => pm.Project)
+            .OrderBy(p => p.Name)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return View(proyectos);
+    }
+
 
 }
