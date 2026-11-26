@@ -9,7 +9,7 @@ namespace G4AspNet.Controllers;
 
 // CÓDIGOS DE LOS PERMISOS DE ACCESO
 
-[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician + "," + RoleNames.TeamLeader)]
+[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
 public class TicketCommentsController : Controller
 {
     private readonly ApplicationDbContext context;

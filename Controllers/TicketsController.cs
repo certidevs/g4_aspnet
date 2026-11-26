@@ -37,7 +37,7 @@ public class TicketsController : Controller
         {
             query = query.Where(t => t.AssignedToId == userId);
         }
-        else if (User.IsInRole(RoleNames.Admin))
+        else if (!User.IsInRole(RoleNames.Admin))
         {
             query = query.Where(t => t.CreatedById == userId);
         }
@@ -84,20 +84,6 @@ public class TicketsController : Controller
     [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin)]
     public async Task<IActionResult> Create()
     {
-        var userId = User.GetRequiredUserId();
-
-        // Si la empresa del usuario está inactiva, no puede crear un ticket
-        if (!User.IsInRole(RoleNames.Admin))
-        {
-            var activeCompany = await context.Users
-                .AnyAsync(u => u.Id == userId && u.Company != null && u.Company.IsActive);
-
-            if (!activeCompany)
-            {
-                TempData["Error"] = "Tu empresa no está activa.";
-                return RedirectToAction(nameof(Index));
-            }
-        }
         // cargar las listas de los selects
         await LoadSelectListsAsync();
         // mismo formulario que Edit, con un ticket vacío
@@ -105,7 +91,7 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets/Edit/1 - Solo admin y técnico pueden editar tickets
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician)]
     public async Task<IActionResult> Edit(int id)
     {
         // buscar el ticket por Id
@@ -122,13 +108,13 @@ public class TicketsController : Controller
 
     // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
-    [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
+    [Authorize]
     public async Task<IActionResult> Save(Ticket ticket)
     {
         // crear: cliente o admin; editar: admin o técnico
         var canSave = ticket.Id == 0
             ? User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin)
-            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader);
+            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician);
         if (!canSave)
         {
             return Forbid();
@@ -140,13 +126,29 @@ public class TicketsController : Controller
         ModelState.Remove(nameof(Ticket.CreatedBy));
         ModelState.Remove(nameof(Ticket.CreatedById));
 
+        if (ticket.Id == 0)
+        {
+            ModelState.Remove(nameof(Ticket.AssignedToId));
+        }
+
         // Id del usuario logueado
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (ticket.Id == 0 && userId == null)
         {
             ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para crear un ticket.");
         }
-
+        // cliente: el proyecto es el de su empresa, no se elige
+        if (ticket.Id == 0 && !User.IsInRole(RoleNames.Admin))
+        {
+            ticket.ProjectId = await context.Projects
+                .Where(p => p.Company.Users.Any(u => u.Id == userId))
+                .Select(p => p.Id)
+                .FirstOrDefaultAsync();
+            if (ticket.ProjectId == 0)
+            {
+                ModelState.AddModelError(string.Empty, "Tu empresa no tiene ningún proyecto.");
+            }
+        }
         // si no valida, volver al formulario con los errores
         if (!ModelState.IsValid)
         {
@@ -160,9 +162,15 @@ public class TicketsController : Controller
         {
             // crear: estado Open, fecha y creador los pone el servidor
             ticket.Status = TicketStatus.Open;
+            if (!User.IsInRole(RoleNames.Admin))
+            {
+                ticket.AssignedToId = null; // no asignado al crear
+            }
+
             ticket.CreatedAt = DateTime.UtcNow;
             ticket.CreatedById = userId!;
             context.Tickets.Add(ticket);
+
         }
         else
         {
