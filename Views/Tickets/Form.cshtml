@@ -42,34 +42,41 @@
             </div>
             <div class="col-md-6">
                 <label asp-for="Priority" class="form-label">Prioridad</label>
-                <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TicketPriority>()" class="form-select"></select>
+                <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TicketPriority>()"
+                        class="form-select"></select>
                 <span asp-validation-for="Priority" class="text-danger"></span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="AssignedToId" class="form-label">Técnico asignado</label>
-                <select asp-for="AssignedToId" asp-items="(SelectList)ViewBag.Technicians" class="form-select">
-                    <option value="">Sin asignar</option>
-                </select>
-                <span asp-validation-for="AssignedToId" class="text-danger"></span>
-            </div>
-            @* El estado solo se edita en tickets existentes: al crear siempre empieza en Open *@
-            @if (Model.Id != 0)
+            @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
             {
-                <div class="col-md-6">
-                    <label asp-for="Status" class="form-label">Estado</label>
-                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<TicketStatus>()" class="form-select"></select>
-                    <span asp-validation-for="Status" class="text-danger"></span>
-                </div>
-            }
-        </div>
-    </div>
-    <div class="card-footer bg-transparent text-end">
-        <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Crear ticket" : "Guardar cambios")</button>
-    </div>
-</form>
 
-@* Validación en el navegador (jQuery Validation) además de la del servidor con ModelState.IsValid *@
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+                <div class="col-md-6">
+                    <label asp-for="AssignedToId" class="form-label">Técnico asignado</label>
+                    <select asp-for="AssignedToId" asp-items="(SelectList)ViewBag.Technicians" class="form-select">
+                        <option value="">Sin asignar</option>
+                    </select>
+                    <span asp-validation-for="AssignedToId" class="text-danger"></span>
+                </div>
+
+                }
+                @* El estado solo se edita en tickets existentes: al crear siempre empieza en Open *@
+                @if (Model.Id != 0)
+                {
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label">Estado</label>
+                        <select asp-for="Status" asp-items="Html.GetEnumSelectList<TicketStatus>()"
+                                class="form-select"></select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-footer bg-transparent text-end">
+            <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Crear ticket" : "Guardar cambios")</button>
+        </div>
+    </form>
+
+    @* Validación en el navegador (jQuery Validation) además de la del servidor con ModelState.IsValid *@
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
 

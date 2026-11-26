@@ -126,6 +126,11 @@ public class TicketsController : Controller
         ModelState.Remove(nameof(Ticket.CreatedBy));
         ModelState.Remove(nameof(Ticket.CreatedById));
 
+        if (ticket.Id == 0)
+        {
+            ModelState.Remove(nameof(Ticket.AssignedToId));
+        }
+
         // Id del usuario logueado
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (ticket.Id == 0 && userId == null)
@@ -146,9 +151,15 @@ public class TicketsController : Controller
         {
             // crear: estado Open, fecha y creador los pone el servidor
             ticket.Status = TicketStatus.Open;
+            if (!User.IsInRole(RoleNames.Admin))
+            {
+                ticket.AssignedToId = null; // no asignado al crear
+            }
+
             ticket.CreatedAt = DateTime.UtcNow;
             ticket.CreatedById = userId!;
             context.Tickets.Add(ticket);
+
         }
         else
         {
