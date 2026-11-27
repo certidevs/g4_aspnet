@@ -1,6 +1,10 @@
+@using System.Security.Claims
 @model Ticket
 @{
     ViewData["Title"] = "Detalle de ticket";
+    var isCreator = User.Identity?.IsAuthenticated == true
+        && User.FindFirstValue(ClaimTypes.NameIdentifier) == Model.CreatedById;
+    var isClosed = Model.Status == TicketStatus.Closed;
     var priorityClass = Model.Priority switch
     {
         TicketPriority.Urgent => "text-bg-primary",
@@ -23,6 +27,23 @@
     </div>
 </div>
 
+@if (isCreator)
+{
+    var action = isClosed ? "Reopen" : "Close";
+    var actionLabel = isClosed ? "Reabrir ticket" : "Cerrar ticket";
+    var commentLabel = isClosed ? "Comentario de reapertura (obligatorio)" : "Comentario de cierre (obligatorio)";
+    var confirmLabel = isClosed ? "Confirmar reapertura" : "Confirmar cierre";
+    <details class="mb-3">
+        <summary class="btn btn-outline-primary">@actionLabel</summary>
+        <form asp-action="@action" asp-route-id="@Model.Id" method="post" class="card card-body mt-2">
+            <label for="statusComment" class="form-label">@commentLabel</label>
+            <textarea id="statusComment" name="comment" class="form-control mb-3" rows="3"
+                      required maxlength="@TicketComment.MaxMessageLength"></textarea>
+            <button class="btn btn-primary align-self-start" type="submit">@confirmLabel</button>
+        </form>
+    </details>
+}
+
 @* Datos del ticket. Project, Category, CreatedBy... están disponibles porque Details los carga con Include *@
 <div class="card mb-4">
     <div class="card-body p-4">
@@ -42,7 +63,7 @@
             <dt class="col-sm-3">Creado por</dt><dd class="col-sm-9">@(Model.CreatedBy.DisplayName ?? Model.CreatedBy.UserName)</dd>
             <dt class="col-sm-3">Técnico asignado</dt><dd class="col-sm-9">@(Model.AssignedTo?.DisplayName ?? Model.AssignedTo?.UserName ?? "Sin asignar")</dd>
             <dt class="col-sm-3">Creado</dt><dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
-            @* ResolvedAt es null hasta que el técnico/admin resuelve o cierra el ticket *@
+            @* ResolvedAt guarda la fecha de resolución o de cierre directo *@
             <dt class="col-sm-3">Resuelto</dt>
             <dd class="col-sm-9">@(Model.ResolvedAt is DateTime resolvedAt ? resolvedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm") : "Sin resolver")</dd>
         </dl>

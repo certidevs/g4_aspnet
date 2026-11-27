@@ -195,6 +195,11 @@ public class TicketsController : Controller
                 return NotFound();
             }
 
+            if (ticket.Status == TicketStatus.Closed && existing.Status != TicketStatus.Closed)
+            {
+                return Forbid();
+            }
+
             // copiar solo los campos del formulario
             existing.Title = ticket.Title;
             existing.Description = ticket.Description;
@@ -224,6 +229,76 @@ public class TicketsController : Controller
 
         // ir al detalle del ticket
         return RedirectToAction(nameof(Details), new { id = ticket.Id });
+    }
+
+    // POST: /Tickets/Close/1 - Solo el creador puede cerrar el ticket
+    [HttpPost]
+    [Authorize]
+    public Task<IActionResult> Close(int id, string? comment) =>
+        ChangeStatusWithCommentAsync(id, comment, TicketStatus.Closed);
+
+    // POST: /Tickets/Reopen/1 - El creador puede reabrir su ticket cerrado
+    [HttpPost]
+    [Authorize]
+    public Task<IActionResult> Reopen(int id, string? comment) =>
+        ChangeStatusWithCommentAsync(id, comment, TicketStatus.Open);
+
+    private async Task<IActionResult> ChangeStatusWithCommentAsync(int id, string? comment, TicketStatus newStatus)
+    {
+        var ticket = await context.Tickets.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id);
+        if (ticket == null)
+        {
+            return NotFound();
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null || ticket.CreatedById != userId)
+        {
+            return Forbid();
+        }
+
+        var isClosing = newStatus == TicketStatus.Closed;
+        var isClosed = ticket.Status == TicketStatus.Closed;
+        if (isClosing == isClosed)
+        {
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var message = comment?.Trim();
+        if (string.IsNullOrEmpty(message) || message.Length > TicketComment.MaxMessageLength)
+        {
+            var action = isClosing ? "cerrar" : "reabrir";
+            TempData["Error"] = $"Escribe un comentario de entre 1 y {TicketComment.MaxMessageLength} caracteres para {action} el ticket.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var changedAt = DateTime.UtcNow;
+        await using var transaction = await context.Database.BeginTransactionAsync();
+
+        // Solo la petición que cambia el estado añade el comentario.
+        var updatedTickets = await context.Tickets
+            .Where(t => t.Id == id && (isClosing ? t.Status != TicketStatus.Closed : t.Status == TicketStatus.Closed))
+            .ExecuteUpdateAsync(update => update
+                .SetProperty(t => t.Status, newStatus)
+                .SetProperty(t => t.ResolvedAt, t => isClosing ? t.ResolvedAt ?? changedAt : null));
+
+        if (updatedTickets == 0)
+        {
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        context.TicketComments.Add(new TicketComment
+        {
+            TicketId = id,
+            AuthorId = userId,
+            Message = message,
+            CreatedAt = changedAt
+        });
+        await context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        TempData["Message"] = isClosing ? "Ticket cerrado correctamente." : "Ticket reabierto correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     // POST: /Tickets/Delete/1 - Solo admin puede eliminar tickets

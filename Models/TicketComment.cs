@@ -7,6 +7,8 @@ namespace G4AspNet.Models;
 /// </summary>
 public class TicketComment
 {
+    public const int MaxMessageLength = 2000;
+
     // 1.-  ID-PK
     public int Id { get; set; }
 
@@ -22,7 +24,7 @@ public class TicketComment
 
     // 4.-  MESSAGE
     [Required]
-    [StringLength(2000)]
+    [StringLength(MaxMessageLength)]
     public string Message { get; set; } = string.Empty;
 
     // 5.-  ISINTERNAL
