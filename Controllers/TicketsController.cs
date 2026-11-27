@@ -10,6 +10,8 @@ namespace G4AspNet.Controllers;
 
 public class TicketsController : Controller
 {
+    private const string NoAvailableProjectsMessage = "Tu empresa no tiene proyectos activos para crear un ticket.";
+
     // acceso a la base de datos
     private readonly ApplicationDbContext context;
 
@@ -85,6 +87,7 @@ public class TicketsController : Controller
     public async Task<IActionResult> Create()
     {
         var userId = User.GetRequiredUserId();
+        var projects = context.Projects.AsQueryable();
 
         // Si la empresa del usuario está inactiva, no puede crear un ticket
         if (!User.IsInRole(RoleNames.Admin))
@@ -97,9 +100,16 @@ public class TicketsController : Controller
                 TempData["Error"] = "Tu empresa no está activa.";
                 return RedirectToAction(nameof(Index));
             }
+
+            projects = GetCompanyProjects(userId);
+            if (!await projects.AnyAsync())
+            {
+                TempData["Error"] = NoAvailableProjectsMessage;
+                return RedirectToAction(nameof(Index));
+            }
         }
         // cargar las listas de los selects
-        await LoadSelectListsAsync();
+        await LoadSelectListsAsync(projects);
         // mismo formulario que Edit, con un ticket vacío
         return View("Form", new Ticket());
     }
@@ -151,22 +161,26 @@ public class TicketsController : Controller
         {
             ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para crear un ticket.");
         }
-        // cliente: el proyecto es el de su empresa, no se elige
+        var projects = context.Projects.AsQueryable();
+        // El cliente solo puede crear tickets para proyectos activos de su empresa.
         if (ticket.Id == 0 && !User.IsInRole(RoleNames.Admin))
         {
-            ticket.ProjectId = await context.Projects
-                .Where(p => p.Company.Users.Any(u => u.Id == userId))
-                .Select(p => p.Id)
-                .FirstOrDefaultAsync();
-            if (ticket.ProjectId == 0)
+            projects = GetCompanyProjects(userId);
+            if (!await projects.AnyAsync(p => p.Id == ticket.ProjectId))
             {
-                ModelState.AddModelError(string.Empty, "Tu empresa no tiene ningún proyecto.");
+                if (!await projects.AnyAsync())
+                {
+                    TempData["Error"] = NoAvailableProjectsMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ModelState.AddModelError(nameof(Ticket.ProjectId), "Selecciona un proyecto activo de tu empresa.");
             }
         }
         // si no valida, volver al formulario con los errores
         if (!ModelState.IsValid)
         {
-            await LoadSelectListsAsync();
+            await LoadSelectListsAsync(projects);
             return View("Form", ticket);
         }
 
@@ -323,10 +337,15 @@ public class TicketsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // rellenar los selects del formulario
-    private async Task LoadSelectListsAsync()
+    private IQueryable<Project> GetCompanyProjects(string? userId)
     {
-        var projects = await context.Projects.OrderBy(p => p.Name).ToListAsync();
+        return context.Projects.Where(p => p.IsActive && p.Company.IsActive && p.Company.Users.Any(u => u.Id == userId));
+    }
+
+    // rellenar los selects del formulario
+    private async Task LoadSelectListsAsync(IQueryable<Project>? availableProjects = null)
+    {
+        var projects = await (availableProjects ?? context.Projects).OrderBy(p => p.Name).ToListAsync();
         ViewBag.Projects = new SelectList(projects, "Id", "Name");
 
         var categories = await context.Categories.OrderBy(c => c.Name).ToListAsync();
