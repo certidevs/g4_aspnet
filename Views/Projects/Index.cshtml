@@ -10,7 +10,7 @@
     </div>
     @if (User.IsInRole(RoleNames.Admin))
     {
-        <a class="btn btn-primary" asp-action="Create">Nuevo proyecto</a>   
+        <a class="btn btn-primary" asp-action="Create">Nuevo proyecto</a>
     }
 </div>
 
@@ -40,20 +40,28 @@ else
                         <td>@project.Company.Name</td>
                         <td>@Html.DisplayFor(modelItem => project.SupportLevel)</td>
                         <td>@project.ResponseTimeHours h</td>
-                        <td><span class="badge @(project.IsActive ? "text-bg-success" : "text-bg-secondary")">@(project.IsActive? "Activo" : "Inactivo")</span></td>
+                        <td><span class="badge @(project.IsActive ? "text-bg-success" : "text-bg-secondary")">@(project.IsActive ?
+                                                        "Activo" : "Inactivo")</span></td>
                             <td class="text-end">
                                 @if (User.IsInRole(RoleNames.Admin))
                                 {
-                                    <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@project.Id">Ver</a>
-                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@project.Id">Editar</a>
+                                    <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@project.Id">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@project.Id">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                    </a>
                                     <form asp-action="Delete" asp-route-id="@project.Id" method="post" class="d-inline"
-                                          onsubmit="return confirm('¿Eliminar este proyecto?')"><button
-                                        class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form>
+                                          onsubmit="return confirm('¿Eliminar este proyecto?')">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
                                 }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
