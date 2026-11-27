@@ -35,13 +35,17 @@ public class TicketsController : Controller
             .AsQueryable();
 
         // admin: todos; técnico: los que tiene asignados; cliente: los que ha creado
-        if (User.IsInRole(RoleNames.Technician))
+        if (User.IsInRole(RoleNames.Admin) ||  User.IsInRole(RoleNames.TeamLeader))
+        {
+            // Sin filtro
+        }
+        else if (User.IsInRole(RoleNames.Technician))
         {
             query = query.Where(t => t.AssignedToId == userId);
         }
-        else if (!User.IsInRole(RoleNames.Admin))
+        else
         {
-            query = query.Where(t => t.CreatedById == userId);
+            query = query.Where(t => t.Project.Company.Users.Any(u => u.Id == userId));
         }
 
         // búsqueda por título, descripción o nombre del proyecto
@@ -83,7 +87,7 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets/Create - Solo usuarios y admin pueden crear tickets
-    [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin)]
+    [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin+"," + RoleNames.TeamLeader)]
     public async Task<IActionResult> Create()
     {
         var userId = User.GetRequiredUserId();
@@ -115,7 +119,7 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets/Edit/1 - Solo admin y técnico pueden editar tickets
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician)]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
     public async Task<IActionResult> Edit(int id)
     {
         // buscar el ticket por Id
@@ -132,7 +136,7 @@ public class TicketsController : Controller
 
     // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
     public async Task<IActionResult> Save(Ticket ticket)
     {
         // crear: cliente o admin; editar: admin o técnico
