@@ -21,13 +21,15 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets
-    public IActionResult Index(string? search)
+    public IActionResult Index(string? search, TicketStatus? status, TicketPriority? priority,
+        int? companyId, int? projectId, int? categoryId, DateTime? from, DateTime? to)
     {
         // Obtenemos el usuario actual que ha hecho login
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         // Include carga el proyecto, la categoría y el técnico de cada ticket para poder mostrarlos
         var query = context.Tickets
             .Include(t => t.Project)
+                .ThenInclude(p => p.Company)
             .Include(t => t.Category)
             .Include(t => t.AssignedTo)
             .Include(t => t.CreatedBy)
@@ -47,11 +49,43 @@ public class TicketsController : Controller
         // búsqueda por título, descripción o nombre del proyecto
         if (!string.IsNullOrWhiteSpace(search))
         {
+            // el admin también puede buscar por Id (con o sin '#')
+            var isAdmin = User.IsInRole(RoleNames.Admin);
+            var hasId = int.TryParse(search.TrimStart('#'), out var searchId);
             query = query.Where(t => t.Title.Contains(search)
                 || t.Description.Contains(search)
-                || t.Project.Name.Contains(search));
+                || t.Project.Name.Contains(search)
+                || (isAdmin && hasId && t.Id == searchId));
         }
         ViewBag.Search = search;
+
+        // filtros para el administrador
+        if (User.IsInRole(RoleNames.Admin))
+        {
+            if (status != null) query = query.Where(t => t.Status == status);
+            if (priority != null) query = query.Where(t => t.Priority == priority);
+            if (companyId != null) query = query.Where(t => t.Project.CompanyId == companyId);
+            if (projectId != null) query = query.Where(t => t.ProjectId == projectId);
+            if (categoryId != null) query = query.Where(t => t.CategoryId == categoryId);
+            if (from != null) query = query.Where(t => t.CreatedAt >= from.Value.Date);
+            if (to != null) query = query.Where(t => t.CreatedAt < to.Value.Date.AddDays(1));
+
+            // valores de los filtros
+            ViewBag.Status = status;
+            ViewBag.Priority = priority;
+            ViewBag.CompanyId = companyId;
+            ViewBag.ProjectId = projectId;
+            ViewBag.CategoryId = categoryId;
+            ViewBag.From = from;
+            ViewBag.To = to;
+            ViewBag.HasFilters = status != null || priority != null || companyId != null || projectId != null
+                || categoryId != null || from != null || to != null;
+
+            // opciones de listas desplegables
+            ViewBag.Companies = new SelectList(context.Companies.OrderBy(c => c.Name), "Id", "Name", companyId);
+            ViewBag.Projects = new SelectList(context.Projects.OrderBy(p => p.Name), "Id", "Name", projectId);
+            ViewBag.Categories = new SelectList(context.Categories.OrderBy(c => c.Name), "Id", "Name", categoryId);
+        }
 
         var tickets = query
             .OrderByDescending(t => t.CreatedAt)
