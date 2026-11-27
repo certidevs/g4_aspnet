@@ -36,12 +36,12 @@ public class TicketsController : Controller
             .ThenInclude(C => C.Company)
             .AsQueryable();
 
-        // admin: todos; técnico: los que tiene asignados; cliente: los que ha creado
+        // admin y team leader: todos; técnico: los que tiene asignados; cliente: los que ha creado
         if (User.IsInRole(RoleNames.Technician))
         {
             query = query.Where(t => t.AssignedToId == userId);
         }
-        else if (!User.IsInRole(RoleNames.Admin))
+        else if (!User.IsInRole(RoleNames.Admin) && !User.IsInRole(RoleNames.TeamLeader))
         {
             query = query.Where(t => t.CreatedById == userId);
         }
