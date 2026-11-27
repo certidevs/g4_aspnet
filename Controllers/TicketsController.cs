@@ -57,21 +57,28 @@ public class TicketsController : Controller
         return View(tickets);
     }
 
+
     // GET: /Tickets/Details/1
     public IActionResult Details(int id)
     {
-        // buscar el ticket con todo lo que muestra la vista
+        // Comprobamos si el usuario puede consultar comentarios internos.
+        bool puedeVerInternos =
+            User.IsInRole(RoleNames.Technician) ||
+            User.IsInRole(RoleNames.Admin);
+
+        // Buscamos el ticket cargando únicamente los comentarios permitidos.
         var ticket = context.Tickets
             .Include(t => t.Project)
                 .ThenInclude(p => p.Company)
             .Include(t => t.Category)
             .Include(t => t.CreatedBy)
             .Include(t => t.AssignedTo)
-            .Include(t => t.Comments)
+            .Include(t => t.Comments
+                .Where(c => puedeVerInternos || !c.IsInternal))
                 .ThenInclude(c => c.Author)
             .FirstOrDefault(t => t.Id == id);
 
-        // si no existe, 404
+        // Si no existe, devolvemos un error 404.
         if (ticket == null)
         {
             return NotFound();
@@ -79,6 +86,7 @@ public class TicketsController : Controller
 
         return View(ticket);
     }
+
 
     // GET: /Tickets/Create - Solo usuarios y admin pueden crear tickets
     [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin)]
