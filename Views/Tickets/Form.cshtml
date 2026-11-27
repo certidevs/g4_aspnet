@@ -33,7 +33,7 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
-            @if (!isTechnician)
+            @if (!User.IsInRole(RoleNames.TeamLeader))
             {
                 <div class="col-md-6">
                     <label asp-for="ProjectId" class="form-label">Proyecto</label>
@@ -61,7 +61,7 @@
                     <span asp-validation-for="Priority" class="text-danger"></span>
                 </div>
             }
-            @if (User.IsInRole(RoleNames.Admin))
+            @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TeamLeader))
             {
 
                 <div class="col-md-6">
@@ -96,4 +96,3 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
-

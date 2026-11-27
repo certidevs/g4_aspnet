@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -14,10 +15,12 @@ public class TicketsController : Controller
 
     // acceso a la base de datos
     private readonly ApplicationDbContext context;
+    private readonly UserManager<ApplicationUser> userManager;
 
-    public TicketsController(ApplicationDbContext context)
+    public TicketsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
         this.context = context;
+        this.userManager = userManager;
     }
 
     // GET: /Tickets
@@ -148,8 +151,8 @@ public class TicketsController : Controller
         return View("Form", new Ticket());
     }
 
-    // GET: /Tickets/Edit/1 - Solo admin y técnico pueden editar tickets
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician)]
+    // GET: /Tickets/Edit/1 - Admin, técnico y team leader pueden editar tickets
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician + "," + RoleNames.TeamLeader)]
     public async Task<IActionResult> Edit(int id)
     {
         // buscar el ticket por Id
@@ -164,15 +167,15 @@ public class TicketsController : Controller
         return View("Form", ticket);
     }
 
-    // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
+    // POST: /Tickets/Save - Usuarios crean; admin, técnico y team leader editan
     [HttpPost]
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician + "," + RoleNames.User)]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician + "," + RoleNames.TeamLeader + "," + RoleNames.User)]
     public async Task<IActionResult> Save(Ticket ticket)
     {
-        // crear: cliente o admin; editar: admin o técnico
+        // crear: cliente o admin; editar: admin, técnico o team leader
         var canSave = ticket.Id == 0
             ? User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin)
-            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician);
+            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader);
         if (!canSave)
         {
             return Forbid();
@@ -194,6 +197,16 @@ public class TicketsController : Controller
         if (ticket.Id == 0)
         {
             ModelState.Remove(nameof(Ticket.AssignedToId));
+        }
+
+        if ((User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TeamLeader))
+            && ticket.AssignedToId != null)
+        {
+            var technician = await userManager.FindByIdAsync(ticket.AssignedToId);
+            if (technician == null || !await userManager.IsInRoleAsync(technician, RoleNames.Technician))
+            {
+                ModelState.AddModelError(nameof(Ticket.AssignedToId), "Selecciona un técnico válido.");
+            }
         }
 
         // Id del usuario logueado
@@ -262,12 +275,15 @@ public class TicketsController : Controller
             existing.Status = ticket.Status;
             //existing.ProjectId = ticket.ProjectId;
             existing.CategoryId = ticket.CategoryId;
-            existing.AssignedToId = ticket.AssignedToId;
 
             if (User.IsInRole(RoleNames.Admin))
             {
-                existing.Priority = ticket.Priority;
                 existing.ProjectId = ticket.ProjectId;
+            }
+
+            if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TeamLeader))
+            {
+                existing.Priority = ticket.Priority;
                 existing.AssignedToId = ticket.AssignedToId;
             }
 
@@ -399,8 +415,7 @@ public class TicketsController : Controller
         var categories = await context.Categories.OrderBy(c => c.Name).ToListAsync();
         ViewBag.Categories = new SelectList(categories, "Id", "Name");
 
-        // técnico: de momento cualquier usuario
-        var users = await context.Users.OrderBy(u => u.UserName).ToListAsync();
-        ViewBag.Technicians = new SelectList(users, "Id", "UserName");
+        var technicians = await userManager.GetUsersInRoleAsync(RoleNames.Technician);
+        ViewBag.Technicians = new SelectList(technicians.OrderBy(user => user.UserName), "Id", "UserName");
     }
 }

@@ -160,7 +160,7 @@
                             }
                             <td>
                                 <div class="table-row-actions">
-                                    @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
+                                    @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader))
                                     {
                                     <a class="table-row-action" asp-action="Edit" asp-route-id="@ticket.Id" title="Editar" aria-label="Editar ticket">
                                         <i class="bi bi-pencil" aria-hidden="true"></i>
