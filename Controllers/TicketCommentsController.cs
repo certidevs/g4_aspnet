@@ -9,7 +9,7 @@ namespace G4AspNet.Controllers;
 
 // CÓDIGOS DE LOS PERMISOS DE ACCESO
 
-[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
+[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
 public class TicketCommentsController : Controller
 {
     private readonly ApplicationDbContext context;
@@ -28,7 +28,8 @@ public class TicketCommentsController : Controller
 
     bool puedeVerInternos =
         User.IsInRole(RoleNames.Technician) ||
-        User.IsInRole(RoleNames.Admin);
+        User.IsInRole(RoleNames.Admin) ||
+        User.IsInRole(RoleNames.TeamLeader);
 
     // Preparamos la consulta cargando el ticket y el autor.
     var consulta = context.TicketComments
@@ -56,7 +57,8 @@ public class TicketCommentsController : Controller
     // Comprobamos si el usuario puede consultar comentarios internos.
     bool puedeVerInternos =
         User.IsInRole(RoleNames.Technician) ||
-        User.IsInRole(RoleNames.Admin);
+        User.IsInRole(RoleNames.Admin) ||
+        User.IsInRole(RoleNames.TeamLeader);
 
     // Preparamos la consulta cargando el ticket y el autor.
     var consulta = context.TicketComments
