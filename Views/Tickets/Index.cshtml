@@ -19,7 +19,7 @@
                 <i class="bi bi-search" aria-hidden="true"></i>
             </button>
             <input class="table-search-input" type="search" name="search" value="@ViewBag.Search"
-                   placeholder="Buscar ticket…" aria-label="Buscar por título, descripción o proyecto" />
+                    placeholder="Buscar ticket…" aria-label="Buscar por título, descripción o proyecto" />
             @if (!string.IsNullOrEmpty(ViewBag.Search as string))
             {
                 <a class="table-search-action table-search-clear" asp-action="Index" aria-label="Limpiar búsqueda" title="Limpiar búsqueda">
@@ -81,7 +81,7 @@
                             <td><span class="table-label @statusClass">@Html.DisplayFor(modelItem => ticket.Status)</span></td>
                             <td>
                                 <div class="table-row-actions">
-                                    @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
+                                    @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader))
                                     {
                                     <a class="table-row-action" asp-action="Edit" asp-route-id="@ticket.Id" title="Editar" aria-label="Editar ticket">
                                         <i class="bi bi-pencil" aria-hidden="true"></i>

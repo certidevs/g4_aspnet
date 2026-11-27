@@ -33,13 +33,17 @@ public class TicketsController : Controller
             .AsQueryable();
 
         // admin: todos; técnico: los que tiene asignados; cliente: los que ha creado
-        if (User.IsInRole(RoleNames.Technician))
+        if (User.IsInRole(RoleNames.Admin) ||  User.IsInRole(RoleNames.TeamLeader))
+        {
+            // Sin filtro
+        }
+        else if (User.IsInRole(RoleNames.Technician))
         {
             query = query.Where(t => t.AssignedToId == userId);
         }
-        else if (!User.IsInRole(RoleNames.Admin))
+        else
         {
-            query = query.Where(t => t.CreatedById == userId);
+            query = query.Where(t => t.Project.Company.Users.Any(u => u.Id == userId));
         }
 
         // búsqueda por título, descripción o nombre del proyecto
@@ -123,17 +127,17 @@ public class TicketsController : Controller
     // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
     [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
-
     public async Task<IActionResult> Save(Ticket ticket)
     {
         // crear: cliente o admin; editar: admin o técnico
         var canSave = ticket.Id == 0
             ? User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin)
-            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader);
+            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician);
         if (!canSave)
         {
             return Forbid();
         }
+
         // el formulario no envía estos campos: quitarlos de la validación
         ModelState.Remove(nameof(Ticket.Project));
         ModelState.Remove(nameof(Ticket.Category));
@@ -225,6 +229,7 @@ public class TicketsController : Controller
         // ir al detalle del ticket
         return RedirectToAction(nameof(Details), new { id = ticket.Id });
     }
+
 
     // POST: /Tickets/Delete/1 - Solo admin puede eliminar tickets
     [HttpPost]

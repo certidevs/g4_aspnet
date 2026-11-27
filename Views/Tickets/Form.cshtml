@@ -30,8 +30,7 @@
                 <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            @if (User.IsInRole(RoleNames.Admin) || Model.Id != 0)
-            {
+            @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TeamLeader) || Model.Id != 0)            {
 
             <div class="col-md-6">
                 <label asp-for="ProjectId" class="form-label">Proyecto</label>
