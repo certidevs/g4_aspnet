@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,11 @@ builder.Services.ConfigureApplicationCookie(options =>
         }
     };
 });
+
+// Toda la web exige sesión iniciada; solo se salta con [AllowAnonymous] que 
+// se encuenta en Controllers\AccountController.cs
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 builder.Services.AddControllersWithViews(options =>
 {

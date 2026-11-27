@@ -1,0 +1,38 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(90deg, #f5f5f5 50%, var(--g4-ink) 50%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: .75rem;
+}
+
+.auth-logo {
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--g4-ink);
+  padding: .5rem;
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .15);
+}
+
+.auth-card .form-control {
+  padding: .75rem 1rem;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .1);
+}
+
+.auth-card .btn-primary {
+  padding: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-size: .85rem;
+}

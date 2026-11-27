@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] is null ? "ZolveSolutions" : $"{ViewData["Title"]} · ZolveSolutions")</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <main class="auth-card card border-0 shadow">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <img class="auth-logo" src="~/logo/logoHelpDesk%20.webp" alt="ZolveSolutions" />
+                <h1 class="h3 fw-bold mt-3 mb-1">@ViewData["Heading"]</h1>
+                <p class="text-secondary small mb-0">@ViewData["Subheading"]</p>
+            </div>
+            @RenderBody()
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
