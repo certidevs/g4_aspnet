@@ -14,3 +14,4 @@ Organización de tareas:
 
 2. Comentar - ya hecho: TicketCommentsController.cs:109 asigna AuthorId. Falta que solo puedan comentar el creador, su empresa, el técnico asignado o el admin.
 
+Next step: Controlador de TicketComment (Comentario de ticket).
