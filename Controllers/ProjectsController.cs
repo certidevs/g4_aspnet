@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering; // lo necesita el bloque comentado de abajo (SelectList)
 using G4AspNet.Data;
 using G4AspNet.Models;
-using Microsoft.AspNetCore.Authorization; // lo necesita el bloque comentado de abajo (Project)
+using Microsoft.AspNetCore.Authorization;
+using G4AspNet.Utilities; // lo necesita el bloque comentado de abajo (Project)
 namespace G4AspNet.Controllers;
 
 public class ProjectsController : Controller
@@ -18,9 +19,16 @@ public class ProjectsController : Controller
     // GET: /Projects
     public IActionResult Index()
     {
+        var userId = User.GetRequiredUserId();
         // Include carga la empresa de cada proyecto para poder mostrar su nombre
-        var projects = context.Projects
-            .Include(p => p.Company)
+        var query = context.Projects.Include(p => p.Company).AsQueryable();
+
+        if (!User.IsInRole(RoleNames.Admin) && !User.IsInRole(RoleNames.Technician) && !User.IsInRole(RoleNames.TeamLeader))
+        {
+            query = query.Where(p => p.Company.Users.Any(u => u.Id == userId));
+        }
+
+        var projects = query
             .OrderBy(p => p.Name)
             .ToList();
         return View(projects);
