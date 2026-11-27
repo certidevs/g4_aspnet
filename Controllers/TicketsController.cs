@@ -90,7 +90,7 @@ public class TicketsController : Controller
         var projects = context.Projects.AsQueryable();
 
         // Si la empresa del usuario está inactiva, no puede crear un ticket
-        if (!User.IsInRole(RoleNames.Admin))
+        if (!User.IsInRole(RoleNames.Admin) && !User.IsInRole(RoleNames.TeamLeader))
         {
             var activeCompany = await context.Users
                 .AnyAsync(u => u.Id == userId && u.Company != null && u.Company.IsActive);
@@ -132,7 +132,7 @@ public class TicketsController : Controller
 
     // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader+","+RoleNames.User)]
     public async Task<IActionResult> Save(Ticket ticket)
     {
         // crear: cliente o admin; editar: admin o técnico
