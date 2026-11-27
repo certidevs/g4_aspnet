@@ -34,12 +34,13 @@ else
                         <td>@comment.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@comment.Id">Ver</a>
-
-                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@comment.Id">Editar</a>
+                            @if (!User.IsInRole(RoleNames.TeamLeader))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@comment.Id">Editar</a>
                                 <form asp-action="Delete" asp-route-id="@comment.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este comentario?')">
                                     <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
                                 </form>
-
+                            }
                         </td>
                     </tr>
                 }

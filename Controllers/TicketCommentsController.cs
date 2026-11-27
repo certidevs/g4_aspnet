@@ -9,7 +9,7 @@ namespace G4AspNet.Controllers;
 
 // CÓDIGOS DE LOS PERMISOS DE ACCESO
 
-[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
+[Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician + "," + RoleNames.TeamLeader)]
 public class TicketCommentsController : Controller
 {
     private readonly ApplicationDbContext context;
@@ -26,10 +26,6 @@ public class TicketCommentsController : Controller
 
     // CONTROL DE PERMISOS PARA VER COMENTARIOS
 
-    bool puedeVerInternos =
-        User.IsInRole(RoleNames.Technician) ||
-        User.IsInRole(RoleNames.Admin);
-
     // Preparamos la consulta cargando el ticket y el autor.
     var consulta = context.TicketComments
         .Include(c => c.Ticket)
@@ -37,7 +33,7 @@ public class TicketCommentsController : Controller
         .AsQueryable();
 
     // Los usuarios normales solo pueden consultar comentarios públicos.
-    if (!puedeVerInternos)
+    if (!PuedeVerComentariosInternos())
     {
         consulta = consulta.Where(c => !c.IsInternal);
     }
@@ -54,10 +50,6 @@ public class TicketCommentsController : Controller
     public IActionResult Details(int id)
     {
     // Comprobamos si el usuario puede consultar comentarios internos.
-    bool puedeVerInternos =
-        User.IsInRole(RoleNames.Technician) ||
-        User.IsInRole(RoleNames.Admin);
-
     // Preparamos la consulta cargando el ticket y el autor.
     var consulta = context.TicketComments
         .Include(c => c.Ticket)
@@ -65,7 +57,7 @@ public class TicketCommentsController : Controller
         .AsQueryable();
 
     // Si no tiene permisos, excluimos los comentarios internos.
-    if (!puedeVerInternos)
+    if (!PuedeVerComentariosInternos())
     {
         consulta = consulta.Where(c => !c.IsInternal);
     }
@@ -88,6 +80,7 @@ public class TicketCommentsController : Controller
 
     // GET: /TicketComments/Create?ticketId=1
     // Muestra el formulario vacío para comentar el ticket indicado. Crear y Editar comparten la vista Form.
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Create(int ticketId)
     {
         // Comprobamos que el ticket existe antes de enseñar el formulario
@@ -114,6 +107,7 @@ public class TicketCommentsController : Controller
         return View("Form", comment);
     } */
 
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Edit(int id)
 {
     // Buscamos el comentario que se quiere editar.
@@ -136,6 +130,7 @@ public class TicketCommentsController : Controller
     // POST: /TicketComments/Save
     // Crea o actualiza según el Id: 0 = comentario nuevo, otro valor = comentario que ya existe
     [HttpPost]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Save(TicketComment comment)
     {
         // El formulario solo envía TicketId, Message e IsInternal. Los objetos Ticket y Author y el AuthorId
@@ -220,6 +215,7 @@ public class TicketCommentsController : Controller
     // POST: /TicketComments/Delete/1
     // POST: /TicketComments/Delete/1
     [HttpPost]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Delete(int id)
     {
         // Buscamos el comentario que se quiere eliminar.
@@ -243,6 +239,13 @@ public class TicketCommentsController : Controller
         TempData["Message"] = "Comentario eliminado correctamente.";
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private bool PuedeVerComentariosInternos()
+    {
+        return User.IsInRole(RoleNames.Technician)
+            || User.IsInRole(RoleNames.TeamLeader)
+            || User.IsInRole(RoleNames.Admin);
     }
 
     // Comprueba si el usuario actual es el autor del comentario o un administrador.
