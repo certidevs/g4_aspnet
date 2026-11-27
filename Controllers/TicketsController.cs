@@ -99,7 +99,9 @@ public class TicketsController : Controller
         // Comprobamos si el usuario puede consultar comentarios internos.
         bool puedeVerInternos =
             User.IsInRole(RoleNames.Technician) ||
+            User.IsInRole(RoleNames.TeamLeader) ||
             User.IsInRole(RoleNames.Admin);
+            
 
         // Buscamos el ticket cargando únicamente los comentarios permitidos.
         var ticket = context.Tickets

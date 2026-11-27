@@ -100,6 +100,35 @@ else
                     <span class="small text-secondary">@comment.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
                 </div>
                 <p class="mb-0">@comment.Message</p>
+
+                @{
+                    var canManageComment =
+                        !User.IsInRole(RoleNames.TeamLeader) &&
+                        (User.IsInRole(RoleNames.Admin) ||
+                         User.FindFirstValue(ClaimTypes.NameIdentifier) == comment.AuthorId);
+                }
+
+                @if (canManageComment)
+                {
+                    <div class="d-flex gap-2 mt-2">
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-controller="TicketComments"
+                           asp-action="Edit"
+                           asp-route-id="@comment.Id">
+                            Editar
+                        </a>
+
+                        <form asp-controller="TicketComments"
+                              asp-action="Delete"
+                              asp-route-id="@comment.Id"
+                              method="post"
+                              onsubmit="return confirm('¿Eliminar este comentario?')">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                }
             </div>
         }
     </div>
