@@ -184,6 +184,13 @@ public class TicketsController : Controller
         ModelState.Remove(nameof(Ticket.CreatedBy));
         ModelState.Remove(nameof(Ticket.CreatedById));
 
+        if (User.IsInRole(RoleNames.Technician))
+        {
+            ModelState.Remove(nameof(Ticket.ProjectId));
+            ModelState.Remove(nameof(Ticket.Priority));
+            ModelState.Remove(nameof(Ticket.AssignedToId));
+        }
+
         if (ticket.Id == 0)
         {
             ModelState.Remove(nameof(Ticket.AssignedToId));
@@ -251,11 +258,18 @@ public class TicketsController : Controller
             // copiar solo los campos del formulario
             existing.Title = ticket.Title;
             existing.Description = ticket.Description;
-            existing.Priority = ticket.Priority;
+            //existing.Priority = ticket.Priority;
             existing.Status = ticket.Status;
-            existing.ProjectId = ticket.ProjectId;
+            //existing.ProjectId = ticket.ProjectId;
             existing.CategoryId = ticket.CategoryId;
             existing.AssignedToId = ticket.AssignedToId;
+
+            if (User.IsInRole(RoleNames.Admin))
+            {
+                existing.Priority = ticket.Priority;
+                existing.ProjectId = ticket.ProjectId;
+                existing.AssignedToId = ticket.AssignedToId;
+            }
 
             // ResolvedAt: se rellena al resolver/cerrar, se vacía si se reabre
             var isFinished = existing.Status == TicketStatus.Resolved || existing.Status == TicketStatus.Closed;

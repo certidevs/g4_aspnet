@@ -3,6 +3,7 @@
     ViewData["Title"] = "Formulario de ticket";
     var isCustomerCreating = Model.Id == 0 && !User.IsInRole(RoleNames.Admin);
     var projects = (SelectList)ViewBag.Projects;
+    var isTechnician = User.IsInRole(RoleNames.Technician);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -31,28 +32,36 @@
                 <textarea asp-for="Description" class="form-control" rows="4"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="ProjectId" class="form-label">Proyecto</label>
-                <select asp-for="ProjectId" asp-items="projects" class="form-select" required="@isCustomerCreating">
-                    @if (isCustomerCreating)
-                    {
-                        <option value="">@(projects.Any() ? "Selecciona un proyecto" : "Tu empresa no tiene proyectos disponibles")</option>
-                    }
-                </select>
-                <span asp-validation-for="ProjectId" class="text-danger"></span>
-            </div>
+
+            @if (!isTechnician)
+            {
+                <div class="col-md-6">
+                    <label asp-for="ProjectId" class="form-label">Proyecto</label>
+                    <select asp-for="ProjectId" asp-items="projects" class="form-select" required="@isCustomerCreating">
+                        @if (isCustomerCreating)
+                        {
+                            <option value="">@(projects.Any() ? "Selecciona un proyecto" : "Tu empresa no tiene proyectos disponibles")</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ProjectId" class="text-danger"></span>
+                </div>
+            }
+
             <div class="col-md-6">
                 <label asp-for="CategoryId" class="form-label">Categoría</label>
                 <select asp-for="CategoryId" asp-items="(SelectList)ViewBag.Categories" class="form-select"></select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="Priority" class="form-label">Prioridad</label>
-                <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TicketPriority>()"
-                        class="form-select"></select>
-                <span asp-validation-for="Priority" class="text-danger"></span>
-            </div>
-            @if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician))
+            @if (!isTechnician)
+            {
+                <div class="col-md-6">
+                    <label asp-for="Priority" class="form-label">Prioridad</label>
+                    <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TicketPriority>()"
+                            class="form-select"></select>
+                    <span asp-validation-for="Priority" class="text-danger"></span>
+                </div>
+            }
+            @if (User.IsInRole(RoleNames.Admin))
             {
 
                 <div class="col-md-6">
@@ -63,28 +72,28 @@
                     <span asp-validation-for="AssignedToId" class="text-danger"></span>
                 </div>
 
-                }
-                @* El estado solo se edita en tickets existentes: al crear siempre empieza en Open *@
-                @if (Model.Id != 0)
-                {
-                    var statusOptions = Html.GetEnumSelectList<TicketStatus>()
-                        .Where(option => Model.Status == TicketStatus.Closed || option.Value != ((int)TicketStatus.Closed).ToString());
-                    <div class="col-md-6">
-                        <label asp-for="Status" class="form-label">Estado</label>
-                        <select asp-for="Status" asp-items="statusOptions"
-                                class="form-select"></select>
-                        <span asp-validation-for="Status" class="text-danger"></span>
-                    </div>
-                }
-            </div>
+            }
+            @* El estado solo se edita en tickets existentes: al crear siempre empieza en Open *@
+            @if (Model.Id != 0)
+            {
+                var statusOptions = Html.GetEnumSelectList<TicketStatus>()
+                    .Where(option => Model.Status == TicketStatus.Closed || option.Value !=
+        ((int)TicketStatus.Closed).ToString());
+                <div class="col-md-6">
+                    <label asp-for="Status" class="form-label">Estado</label>
+                    <select asp-for="Status" asp-items="statusOptions" class="form-select"></select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            }
         </div>
-        <div class="card-footer bg-transparent text-end">
-            <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Crear ticket" : "Guardar cambios")</button>
-        </div>
-    </form>
+    </div>
+    <div class="card-footer bg-transparent text-end">
+        <button class="btn btn-primary" type="submit">@(Model.Id == 0 ? "Crear ticket" : "Guardar cambios")</button>
+    </div>
+</form>
 
-    @* Validación en el navegador (jQuery Validation) además de la del servidor con ModelState.IsValid *@
-    @section Scripts {
-        <partial name="_ValidationScriptsPartial" />
-    }
+@* Validación en el navegador (jQuery Validation) además de la del servidor con ModelState.IsValid *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
 
