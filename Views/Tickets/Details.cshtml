@@ -33,12 +33,13 @@
     var actionLabel = isClosed ? "Reabrir ticket" : "Cerrar ticket";
     var commentLabel = isClosed ? "Comentario de reapertura (obligatorio)" : "Comentario de cierre (obligatorio)";
     var confirmLabel = isClosed ? "Confirmar reapertura" : "Confirmar cierre";
+    var maxCommentLength = isClosed ? TicketComment.MaxReopeningCommentLength : TicketComment.MaxClosingCommentLength;
     <details class="mb-3">
         <summary class="btn btn-outline-primary">@actionLabel</summary>
         <form asp-action="@action" asp-route-id="@Model.Id" method="post" class="card card-body mt-2">
             <label for="statusComment" class="form-label">@commentLabel</label>
             <textarea id="statusComment" name="comment" class="form-control mb-3" rows="3"
-                      required maxlength="@TicketComment.MaxMessageLength"></textarea>
+                      required maxlength="@maxCommentLength"></textarea>
             <button class="btn btn-primary align-self-start" type="submit">@confirmLabel</button>
         </form>
     </details>

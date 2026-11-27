@@ -265,10 +265,11 @@ public class TicketsController : Controller
         }
 
         var message = comment?.Trim();
-        if (string.IsNullOrEmpty(message) || message.Length > TicketComment.MaxMessageLength)
+        var maxCommentLength = isClosing ? TicketComment.MaxClosingCommentLength : TicketComment.MaxReopeningCommentLength;
+        if (string.IsNullOrEmpty(message) || message.Length > maxCommentLength)
         {
             var action = isClosing ? "cerrar" : "reabrir";
-            TempData["Error"] = $"Escribe un comentario de entre 1 y {TicketComment.MaxMessageLength} caracteres para {action} el ticket.";
+            TempData["Error"] = $"Escribe un comentario de entre 1 y {maxCommentLength} caracteres para {action} el ticket.";
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -287,11 +288,12 @@ public class TicketsController : Controller
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        var messagePrefix = isClosing ? TicketComment.ClosingMessagePrefix : TicketComment.ReopeningMessagePrefix;
         context.TicketComments.Add(new TicketComment
         {
             TicketId = id,
             AuthorId = userId,
-            Message = message,
+            Message = messagePrefix + message,
             CreatedAt = changedAt
         });
         await context.SaveChangesAsync();

@@ -8,6 +8,10 @@ namespace G4AspNet.Models;
 public class TicketComment
 {
     public const int MaxMessageLength = 2000;
+    public const string ClosingMessagePrefix = "Ticket cerrado. ";
+    public const string ReopeningMessagePrefix = "Ticket reabierto. ";
+    public static int MaxClosingCommentLength => MaxMessageLength - ClosingMessagePrefix.Length;
+    public static int MaxReopeningCommentLength => MaxMessageLength - ReopeningMessagePrefix.Length;
 
     // 1.-  ID-PK
     public int Id { get; set; }
