@@ -33,7 +33,7 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
-            @if (!User.IsInRole(RoleNames.TeamLeader))
+            @if (User.IsInRole(RoleNames.Admin) || isCustomerCreating)
             {
                 <div class="col-md-6">
                     <label asp-for="ProjectId" class="form-label">Proyecto</label>
@@ -74,11 +74,18 @@
 
             }
             @* El estado solo se edita en tickets existentes: al crear siempre empieza en Open *@
-            @if (Model.Id != 0)
+            @if (Model.Id != 0 && Model.Status == TicketStatus.Closed)
+            {
+                <div class="col-md-6">
+                    <label class="form-label" for="closedStatus">Estado</label>
+                    <input class="form-control" id="closedStatus" value="@Html.DisplayFor(ticket => ticket.Status)" readonly />
+                    <input type="hidden" asp-for="Status" />
+                </div>
+            }
+            else if (Model.Id != 0)
             {
                 var statusOptions = Html.GetEnumSelectList<TicketStatus>()
-                    .Where(option => Model.Status == TicketStatus.Closed || option.Value !=
-        ((int)TicketStatus.Closed).ToString());
+                    .Where(option => option.Value != ((int)TicketStatus.Closed).ToString());
                 <div class="col-md-6">
                     <label asp-for="Status" class="form-label">Estado</label>
                     <select asp-for="Status" asp-items="statusOptions" class="form-select"></select>

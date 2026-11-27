@@ -172,10 +172,13 @@ public class TicketsController : Controller
     [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician + "," + RoleNames.TeamLeader + "," + RoleNames.User)]
     public async Task<IActionResult> Save(Ticket ticket)
     {
-        // crear: cliente o admin; editar: admin, técnico o team leader
-        var canSave = ticket.Id == 0
-            ? User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin)
-            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader);
+        var isNew = ticket.Id == 0;
+        var isAdmin = User.IsInRole(RoleNames.Admin);
+        var isTeamLeader = User.IsInRole(RoleNames.TeamLeader);
+        var canAssign = isAdmin || isTeamLeader;
+        var canSave = isNew
+            ? isAdmin || User.IsInRole(RoleNames.User)
+            : canAssign || User.IsInRole(RoleNames.Technician);
         if (!canSave)
         {
             return Forbid();
@@ -194,16 +197,16 @@ public class TicketsController : Controller
             ModelState.Remove(nameof(Ticket.AssignedToId));
         }
 
-        if (ticket.Id == 0)
+        if (isNew)
         {
             ModelState.Remove(nameof(Ticket.AssignedToId));
         }
 
-        if ((User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TeamLeader))
-            && ticket.AssignedToId != null)
+        ApplicationUser? selectedTechnician = null;
+        if (canAssign && ticket.AssignedToId != null)
         {
-            var technician = await userManager.FindByIdAsync(ticket.AssignedToId);
-            if (technician == null || !await userManager.IsInRoleAsync(technician, RoleNames.Technician))
+            selectedTechnician = await userManager.FindByIdAsync(ticket.AssignedToId);
+            if (selectedTechnician == null || !await userManager.IsInRoleAsync(selectedTechnician, RoleNames.Technician))
             {
                 ModelState.AddModelError(nameof(Ticket.AssignedToId), "Selecciona un técnico válido.");
             }
@@ -211,13 +214,13 @@ public class TicketsController : Controller
 
         // Id del usuario logueado
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (ticket.Id == 0 && userId == null)
+        if (userId == null)
         {
-            ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para crear un ticket.");
+            return Forbid();
         }
         var projects = context.Projects.AsQueryable();
         // El cliente solo puede crear tickets para proyectos activos de su empresa.
-        if (ticket.Id == 0 && !User.IsInRole(RoleNames.Admin))
+        if (isNew && !isAdmin)
         {
             projects = GetCompanyProjects(userId);
             if (!await projects.AnyAsync(p => p.Id == ticket.ProjectId))
@@ -238,26 +241,26 @@ public class TicketsController : Controller
             return View("Form", ticket);
         }
 
-        // Id 0 = ticket nuevo
-        var isNew = ticket.Id == 0;
         if (isNew)
         {
             // crear: estado Open, fecha y creador los pone el servidor
             ticket.Status = TicketStatus.Open;
-            if (!User.IsInRole(RoleNames.Admin))
+            if (!isAdmin)
             {
                 ticket.AssignedToId = null; // no asignado al crear
             }
 
             ticket.CreatedAt = DateTime.UtcNow;
-            ticket.CreatedById = userId!;
+            ticket.CreatedById = userId;
             context.Tickets.Add(ticket);
-
         }
         else
         {
-            // editar: buscar el ticket existente
-            var existing = await context.Tickets.FindAsync(ticket.Id);
+            var existing = await context.Tickets
+                .Include(t => t.Project)
+                .Include(t => t.Category)
+                .Include(t => t.AssignedTo)
+                .FirstOrDefaultAsync(t => t.Id == ticket.Id);
             if (existing == null)
             {
                 return NotFound();
@@ -268,23 +271,79 @@ public class TicketsController : Controller
                 return Forbid();
             }
 
-            // copiar solo los campos del formulario
-            existing.Title = ticket.Title;
-            existing.Description = ticket.Description;
-            //existing.Priority = ticket.Priority;
-            existing.Status = ticket.Status;
-            //existing.ProjectId = ticket.ProjectId;
-            existing.CategoryId = ticket.CategoryId;
+            var changeMessages = new List<string>();
+            var editorRole = isAdmin ? "Admin" : isTeamLeader ? "Team Leader" : "Técnico";
 
-            if (User.IsInRole(RoleNames.Admin))
+            if (existing.Title != ticket.Title)
             {
+                changeMessages.Add($"{editorRole} cambió el título de \"{existing.Title}\" a \"{ticket.Title}\".");
+                existing.Title = ticket.Title;
+            }
+
+            if (existing.Description != ticket.Description)
+            {
+                changeMessages.Add($"{editorRole} actualizó la descripción del ticket.");
+                existing.Description = ticket.Description;
+            }
+
+            if (canAssign && existing.Priority != ticket.Priority)
+            {
+                changeMessages.Add(
+                    $"{editorRole} cambió la prioridad de {GetPriorityName(existing.Priority)} a {GetPriorityName(ticket.Priority)}.");
+                existing.Priority = ticket.Priority;
+            }
+
+            if (isAdmin && existing.ProjectId != ticket.ProjectId)
+            {
+                var newProjectName = await context.Projects
+                    .Where(p => p.Id == ticket.ProjectId)
+                    .Select(p => p.Name)
+                    .FirstOrDefaultAsync() ?? ticket.ProjectId.ToString();
+                var oldProjectName = existing.Project?.Name ?? existing.ProjectId.ToString();
+                changeMessages.Add($"{editorRole} cambió el proyecto de {oldProjectName} a {newProjectName}.");
                 existing.ProjectId = ticket.ProjectId;
             }
 
-            if (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.TeamLeader))
+            if (existing.CategoryId != ticket.CategoryId)
             {
-                existing.Priority = ticket.Priority;
+                var newCategoryName = await context.Categories
+                    .Where(c => c.Id == ticket.CategoryId)
+                    .Select(c => c.Name)
+                    .FirstOrDefaultAsync() ?? ticket.CategoryId.ToString();
+                var oldCategoryName = existing.Category?.Name ?? existing.CategoryId.ToString();
+                changeMessages.Add($"{editorRole} cambió la categoría de {oldCategoryName} a {newCategoryName}.");
+                existing.CategoryId = ticket.CategoryId;
+            }
+
+            if (canAssign && existing.AssignedToId != ticket.AssignedToId)
+            {
+                var oldTechnician = existing.AssignedTo?.DisplayName
+                    ?? existing.AssignedTo?.UserName
+                    ?? "Sin asignar";
+                var newTechnician = selectedTechnician?.DisplayName
+                    ?? selectedTechnician?.UserName
+                    ?? "Sin asignar";
+                changeMessages.Add($"{editorRole} cambió el técnico asignado de {oldTechnician} a {newTechnician}.");
                 existing.AssignedToId = ticket.AssignedToId;
+            }
+
+            if (existing.Status != ticket.Status)
+            {
+                changeMessages.Add(
+                    $"{editorRole} cambió el estado de {GetStatusName(existing.Status)} a {GetStatusName(ticket.Status)}.");
+                existing.Status = ticket.Status;
+            }
+
+            var changedAt = DateTime.UtcNow;
+            foreach (var message in changeMessages)
+            {
+                context.TicketComments.Add(new TicketComment
+                {
+                    TicketId = existing.Id,
+                    AuthorId = userId,
+                    Message = message,
+                    CreatedAt = changedAt
+                });
             }
 
             // ResolvedAt: se rellena al resolver/cerrar, se vacía si se reabre
@@ -399,6 +458,31 @@ public class TicketsController : Controller
 
         TempData["Message"] = "Ticket eliminado correctamente (y sus comentarios).";
         return RedirectToAction(nameof(Index));
+    }
+
+    private static string GetStatusName(TicketStatus status)
+    {
+        return status switch
+        {
+            TicketStatus.Open => "Abierto",
+            TicketStatus.InProgress => "En progreso",
+            TicketStatus.WaitingCustomer => "Espera de cliente",
+            TicketStatus.Resolved => "Resuelto",
+            TicketStatus.Closed => "Cerrado",
+            _ => status.ToString()
+        };
+    }
+
+    private static string GetPriorityName(TicketPriority priority)
+    {
+        return priority switch
+        {
+            TicketPriority.Low => "Baja",
+            TicketPriority.Medium => "Media",
+            TicketPriority.High => "Alta",
+            TicketPriority.Urgent => "Urgente",
+            _ => priority.ToString()
+        };
     }
 
     private IQueryable<Project> GetCompanyProjects(string? userId)
