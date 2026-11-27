@@ -166,7 +166,7 @@ public class TicketsController : Controller
 
     // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader+","+RoleNames.User)]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician + "," + RoleNames.User)]
     public async Task<IActionResult> Save(Ticket ticket)
     {
         // crear: cliente o admin; editar: admin o técnico

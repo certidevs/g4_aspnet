@@ -10,7 +10,7 @@
 <div class="table-panel">
     <div class="table-panel-header">
         <h1 class="table-panel-title" id="tickets-heading">Tickets</h1>
-        @if (!User.IsInRole(RoleNames.Technician))
+        @if (User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin))
         {
             <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo ticket</a>
         }
