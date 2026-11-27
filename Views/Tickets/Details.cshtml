@@ -82,7 +82,7 @@
 else
 {
     <div class="list-group">
-        @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+        @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.Id))
         {
             <div class="list-group-item">
                 <div class="d-flex flex-wrap justify-content-between gap-2">
