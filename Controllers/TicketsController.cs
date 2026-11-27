@@ -81,7 +81,7 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets/Create - Solo usuarios y admin pueden crear tickets
-    [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin)]
+    [Authorize(Roles = RoleNames.User + "," + RoleNames.Admin+"," + RoleNames.TeamLeader)]
     public async Task<IActionResult> Create()
     {
         var userId = User.GetRequiredUserId();
@@ -105,7 +105,7 @@ public class TicketsController : Controller
     }
 
     // GET: /Tickets/Edit/1 - Solo admin y técnico pueden editar tickets
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician)]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
     public async Task<IActionResult> Edit(int id)
     {
         // buscar el ticket por Id
@@ -122,18 +122,18 @@ public class TicketsController : Controller
 
     // POST: /Tickets/Save - Solo usuarios, admin y técnico pueden guardar tickets
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Technician+"," + RoleNames.TeamLeader)]
+
     public async Task<IActionResult> Save(Ticket ticket)
     {
         // crear: cliente o admin; editar: admin o técnico
         var canSave = ticket.Id == 0
             ? User.IsInRole(RoleNames.User) || User.IsInRole(RoleNames.Admin)
-            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician);
+            : User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Technician) || User.IsInRole(RoleNames.TeamLeader);
         if (!canSave)
         {
             return Forbid();
         }
-
         // el formulario no envía estos campos: quitarlos de la validación
         ModelState.Remove(nameof(Ticket.Project));
         ModelState.Remove(nameof(Ticket.Category));
