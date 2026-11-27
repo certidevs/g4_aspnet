@@ -96,22 +96,24 @@ public class TicketsController : Controller
     // GET: /Tickets/Details/1
     public IActionResult Details(int id)
     {
-        // buscar el ticket con todo lo que muestra la vista
+        // Comprobamos si el usuario puede consultar comentarios internos.
+        bool puedeVerInternos =
+            User.IsInRole(RoleNames.Technician) ||
+            User.IsInRole(RoleNames.Admin);
+
+        // Buscamos el ticket cargando únicamente los comentarios permitidos.
         var ticket = context.Tickets
             .Include(t => t.Project)
                 .ThenInclude(p => p.Company)
             .Include(t => t.Category)
             .Include(t => t.CreatedBy)
             .Include(t => t.AssignedTo)
-            .Include(t => t.Comments)
+            .Include(t => t.Comments
+                .Where(c => puedeVerInternos || !c.IsInternal))
                 .ThenInclude(c => c.Author)
             .FirstOrDefault(t => t.Id == id);
 
-        // si no existe, 404
-        if (ticket == null)
-        {
-            return NotFound();
-        }
+        if (ticket == null) return NotFound();
 
         return View(ticket);
     }

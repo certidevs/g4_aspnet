@@ -1,14 +1,14 @@
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims; // lo necesita el bloque comentado de abajo (ClaimTypes)
+using System.Security.Claims;
 using G4AspNet.Data;
-using G4AspNet.Models; // lo necesita el bloque comentado de abajo (TicketComment)
+using G4AspNet.Models;
+
 namespace G4AspNet.Controllers;
 
-
-// CÓDIGOS DE LOS PERMISOS DE ACCESO
-
+// Admin, User, Technician y TeamLeader pueden consultar comentarios.
 [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician + "," + RoleNames.TeamLeader)]
 public class TicketCommentsController : Controller
 {
@@ -20,71 +20,58 @@ public class TicketCommentsController : Controller
     }
 
     // GET: /TicketComments
+    // Lista los comentarios que puede consultar el usuario.
     public IActionResult Index()
     {
-    // Comprobamos si el usuario puede consultar comentarios internos.
+        var consulta = context.TicketComments
+            .Include(c => c.Ticket)
+            .Include(c => c.Author)
+            .AsQueryable();
 
-    // CONTROL DE PERMISOS PARA VER COMENTARIOS
+        if (!PuedeVerComentariosInternos())
+        {
+            consulta = consulta.Where(c => !c.IsInternal);
+        }
 
-    // Preparamos la consulta cargando el ticket y el autor.
-    var consulta = context.TicketComments
-        .Include(c => c.Ticket)
-        .Include(c => c.Author)
-        .AsQueryable();
+        var comments = consulta
+            .OrderByDescending(c => c.CreatedAt)
+            .ToList();
 
-    // Los usuarios normales solo pueden consultar comentarios públicos.
-    if (!PuedeVerComentariosInternos())
-    {
-        consulta = consulta.Where(c => !c.IsInternal);
-    }
-
-    // Ordenamos los comentarios del más reciente al más antiguo.
-    var comments = consulta
-        .OrderByDescending(c => c.CreatedAt)
-        .ToList();
-
-    return View(comments);
+        return View(comments);
     }
 
     // GET: /TicketComments/Details/1
+    // Muestra el detalle de un comentario si el usuario puede verlo.
     public IActionResult Details(int id)
     {
-    // Comprobamos si el usuario puede consultar comentarios internos.
-    // Preparamos la consulta cargando el ticket y el autor.
-    var consulta = context.TicketComments
-        .Include(c => c.Ticket)
-        .Include(c => c.Author)
-        .AsQueryable();
+        var consulta = context.TicketComments
+            .Include(c => c.Ticket)
+            .Include(c => c.Author)
+            .AsQueryable();
 
-    // Si no tiene permisos, excluimos los comentarios internos.
-    if (!PuedeVerComentariosInternos())
-    {
-        consulta = consulta.Where(c => !c.IsInternal);
+        if (!PuedeVerComentariosInternos())
+        {
+            consulta = consulta.Where(c => !c.IsInternal);
+        }
+
+        var comment = consulta.FirstOrDefault(c => c.Id == id);
+
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        return View(comment);
     }
-
-    // Buscamos el comentario solicitado.
-    var comment = consulta.FirstOrDefault(c => c.Id == id);
-
-    if (comment == null)
-    {
-        return NotFound();
-    }
-
-    return View(comment);
-    }
-
-// DESCOMENTA DESDE AQUÍ (issue #18): Create, Edit, Save y Delete
-   // Pasos: 1) quita este comentario (borra la primera línea y la última, FIN DESCOMENTA), 2) ajusta los campos de tu entidad, 3) descomenta y ajusta Views/TicketComments/Form.cshtml, 4) descomenta los botones de Index y Details (y el botón "Añadir comentario" de Views/Tickets/Details.cshtml).
-   // Modelo a copiar: CompaniesController (ejemplo completo y probado).
-   // Los comentarios se crean desde el detalle de un ticket: el botón lleva a Create con el ticketId.
 
     // GET: /TicketComments/Create?ticketId=1
-    // Muestra el formulario vacío para comentar el ticket indicado. Crear y Editar comparten la vista Form.
+    // Solo Admin, User y Technician pueden crear comentarios.
     [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Create(int ticketId)
     {
-        // Comprobamos que el ticket existe antes de enseñar el formulario
-        var ticketExists = await context.Tickets.AnyAsync(t => t.Id == ticketId);
+        var ticketExists = await context.Tickets
+            .AnyAsync(t => t.Id == ticketId);
+
         if (!ticketExists)
         {
             return NotFound();
@@ -94,60 +81,45 @@ public class TicketCommentsController : Controller
     }
 
     // GET: /TicketComments/Edit/1
-    // Muestra el mismo formulario, relleno con los datos del comentario
-    /* public async Task<IActionResult> Edit(int id)
+    // Solo el autor o un administrador pueden editar.
+    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
+    public async Task<IActionResult> Edit(int id)
     {
-        // FindAsync busca por clave primaria y devuelve null si no existe
         var comment = await context.TicketComments.FindAsync(id);
+
         if (comment == null)
         {
             return NotFound();
         }
 
+        if (!CanManageComment(comment))
+        {
+            return Forbid();
+        }
+
         return View("Form", comment);
-    } */
-
-    [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
-    public async Task<IActionResult> Edit(int id)
-{
-    // Buscamos el comentario que se quiere editar.
-    var comment = await context.TicketComments.FindAsync(id);
-
-    if (comment == null)
-    {
-        return NotFound();
     }
-
-    // Solo el autor o un administrador pueden editarlo.
-    if (!CanManageComment(comment))
-    {
-        return Forbid();
-    }
-
-    return View("Form", comment);
-}
 
     // POST: /TicketComments/Save
-    // Crea o actualiza según el Id: 0 = comentario nuevo, otro valor = comentario que ya existe
+    // Crea o actualiza un comentario.
     [HttpPost]
     [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Save(TicketComment comment)
     {
-        // El formulario solo envía TicketId, Message e IsInternal. Los objetos Ticket y Author y el AuthorId
-        // no vienen del formulario; como en el modelo no son nulos, MVC los marcaría como "obligatorios"
-        // y el formulario nunca validaría: quitamos esas validaciones.
+        // El formulario no envía estos objetos ni el AuthorId.
         ModelState.Remove(nameof(TicketComment.Ticket));
         ModelState.Remove(nameof(TicketComment.Author));
         ModelState.Remove(nameof(TicketComment.AuthorId));
 
-        // Autor del comentario: el usuario que ha iniciado sesión (su Id está en la cookie de sesión)
+        // Identificamos al usuario que ha iniciado sesión.
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (comment.Id == 0 && userId == null)
         {
-            ModelState.AddModelError(string.Empty, "Tienes que iniciar sesión para escribir un comentario.");
+            ModelState.AddModelError(
+                string.Empty,
+                "Tienes que iniciar sesión para escribir un comentario.");
         }
-
-        // CONTROL DE PERMISOS PARA CREAR COMENTARIOS INTERNOS
 
         // Los comentarios internos solo pueden crearlos técnicos y administradores.
         if (comment.IsInternal &&
@@ -159,38 +131,38 @@ public class TicketCommentsController : Controller
                 "No tienes permiso para crear comentarios internos.");
         }
 
-        // Si algo no valida, volvemos al formulario con los errores
         if (!ModelState.IsValid)
         {
             return View("Form", comment);
         }
 
         var isNew = comment.Id == 0;
+
         if (isNew)
         {
-            // CREAR: comprobamos que el ticket existe (el TicketId viaja en un campo oculto)
-            var ticketExists = await context.Tickets.AnyAsync(t => t.Id == comment.TicketId);
+            var ticketExists = await context.Tickets
+                .AnyAsync(t => t.Id == comment.TicketId);
+
             if (!ticketExists)
             {
                 return NotFound();
             }
 
-            // Estos datos no vienen del formulario, los pone el servidor
-            comment.AuthorId = userId!; // no es null: arriba hemos comprobado que hay sesión iniciada
+            comment.AuthorId = userId!;
             comment.CreatedAt = DateTime.UtcNow;
+
             context.TicketComments.Add(comment);
         }
         else
         {
-            // EDITAR: cargamos el comentario y solo cambiamos el mensaje y si es interno.
-            var existing = await context.TicketComments.FindAsync(comment.Id);
+            var existing = await context.TicketComments
+                .FindAsync(comment.Id);
 
             if (existing == null)
             {
                 return NotFound();
             }
 
-            // Solo el autor o un administrador pueden guardar cambios.
             if (!CanManageComment(existing))
             {
                 return Forbid();
@@ -199,26 +171,28 @@ public class TicketCommentsController : Controller
             existing.Message = comment.Message;
             existing.IsInternal = comment.IsInternal;
 
-            // Conservamos el ticket original para volver a sus detalles.
+            // Conservamos el ticket original.
             comment.TicketId = existing.TicketId;
         }
 
         await context.SaveChangesAsync();
 
-        // TempData guarda un mensaje para la siguiente petición; el _Layout lo muestra
-        TempData["Message"] = isNew ? "Comentario añadido correctamente." : "Comentario actualizado correctamente.";
+        TempData["Message"] = isNew
+            ? "Comentario añadido correctamente."
+            : "Comentario actualizado correctamente.";
 
-        // Volvemos al detalle del ticket, que es donde se ven los comentarios
-        return RedirectToAction("Details", "Tickets", new { id = comment.TicketId });
+        return RedirectToAction(
+            "Details",
+            "Tickets",
+            new { id = comment.TicketId });
     }
 
     // POST: /TicketComments/Delete/1
-    // POST: /TicketComments/Delete/1
+    // Solo el autor o un administrador pueden eliminar.
     [HttpPost]
     [Authorize(Roles = RoleNames.Admin + "," + RoleNames.User + "," + RoleNames.Technician)]
     public async Task<IActionResult> Delete(int id)
     {
-        // Buscamos el comentario que se quiere eliminar.
         var comment = await context.TicketComments.FindAsync(id);
 
         if (comment == null)
@@ -226,7 +200,6 @@ public class TicketCommentsController : Controller
             return NotFound();
         }
 
-        // Solo el autor o un administrador pueden eliminarlo.
         if (!CanManageComment(comment))
         {
             return Forbid();
@@ -241,6 +214,7 @@ public class TicketCommentsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // Comprueba quién puede consultar comentarios internos.
     private bool PuedeVerComentariosInternos()
     {
         return User.IsInRole(RoleNames.Technician)
@@ -248,12 +222,12 @@ public class TicketCommentsController : Controller
             || User.IsInRole(RoleNames.Admin);
     }
 
-    // Comprueba si el usuario actual es el autor del comentario o un administrador.
+    // Comprueba si el usuario es el autor o un administrador.
     private bool CanManageComment(TicketComment comment)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        return User.IsInRole(RoleNames.Admin) || userId == comment.AuthorId;
+        return User.IsInRole(RoleNames.Admin)
+            || userId == comment.AuthorId;
     }
-
 }

@@ -19,7 +19,7 @@
         <input type="hidden" asp-for="TicketId" />
 
         <p class="text-secondary">
-            Comentario dels
+            Comentario del
             <a asp-controller="Tickets"
                asp-action="Details"
                asp-route-id="@Model.TicketId">
@@ -41,6 +41,8 @@
                         Comentario interno (solo para el equipo de soporte)
                     </label>
                 </div>
+
+                <span asp-validation-for="IsInternal" class="text-danger"></span>
             </div>
         </div>
     </div>
